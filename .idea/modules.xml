@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/lucky-cart-android.iml" filepath="$PROJECT_DIR$/.idea/modules/lucky-cart-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/lucky-cart-android.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/lucky-cart-android.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/luckyCartSDK/lucky-cart-android.luckyCartSDK.iml" filepath="$PROJECT_DIR$/.idea/modules/luckyCartSDK/lucky-cart-android.luckyCartSDK.iml" />
+    </modules>
+  </component>
+</project>
