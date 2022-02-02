@@ -2,11 +2,19 @@ package com.luckycart.sdk
 
 
 import android.content.Context
+import android.widget.Toast
 import com.luckycart.local.Prefs
+import com.luckycart.model.Banners
 import com.luckycart.model.LCAuthorization
+import com.luckycart.retrofit.BannerDataManager
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.observers.DisposableObserver
+import io.reactivex.schedulers.Schedulers
 
-class LuckCartSDK(context: Context) : LuckyCart {
+class LuckCartSDK(context: Context) {
+    var luckyCartListener: LuckyCartListenerCallback? = null
     var mContext = context
+    private var bannerDataManager: BannerDataManager = BannerDataManager()
 
     fun init(authorization: LCAuthorization, customer: String?) {
         if (customer != null) {
@@ -15,10 +23,40 @@ class LuckCartSDK(context: Context) : LuckyCart {
         Prefs(mContext).key = authorization.key
     }
 
-    override fun setUser(customer: String?) {
+    fun setUser(customer: String?) {
         if (customer != null) {
             Prefs(mContext).customer = customer
         } else Prefs(mContext).customer = "unknown"
+    }
+
+    fun setActionListener(callBack: LuckyCartListenerCallback?) {
+        luckyCartListener = callBack
+    }
+
+    fun listAvailableBanners() {
+        val customer = Prefs(mContext).customer
+        val key = Prefs(mContext).key
+        key?.let { auth_key ->
+            customer?.let { customer ->
+                bannerDataManager.listAvailableBanners(auth_key, customer)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(object : DisposableObserver<Banners>() {
+                        override fun onNext(banners: Banners) {
+                            luckyCartListener?.listAvailableBanners(banners)
+                        }
+
+                        override fun onError(e: Throwable) {
+                            Toast.makeText(mContext, "Error: " + e.message, Toast.LENGTH_SHORT)
+                                .show()
+                        }
+
+                        override fun onComplete() {}
+
+                    })
+
+            }
+        }
     }
 
 }
