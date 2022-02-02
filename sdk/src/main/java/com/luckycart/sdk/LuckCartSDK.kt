@@ -45,6 +45,7 @@ class LuckCartSDK(context: Context) {
                     .subscribeWith(object : DisposableObserver<Banners>() {
                         override fun onNext(banners: Banners) {
                             luckyCartListener?.listAvailableBanners(banners)
+                            Prefs(mContext).banners = banners
                         }
 
                         override fun onError(e: Throwable) {
