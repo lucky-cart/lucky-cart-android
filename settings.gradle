@@ -7,5 +7,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "lucky-cart-android"
-include ':app'
-include ':luckyCartSDK'
+include ':sdk'
