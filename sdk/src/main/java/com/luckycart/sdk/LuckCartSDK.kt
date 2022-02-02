@@ -4,6 +4,7 @@ package com.luckycart.sdk
 import android.content.Context
 import android.widget.Toast
 import com.luckycart.local.Prefs
+import com.luckycart.model.BannerDetails
 import com.luckycart.model.Banners
 import com.luckycart.model.LCAuthorization
 import com.luckycart.retrofit.BannerDataManager
@@ -52,6 +53,33 @@ class LuckCartSDK(context: Context) {
                         }
 
                         override fun onComplete() {}
+
+                    })
+
+            }
+        }
+    }
+
+    fun getBannerDetails(pageType: String, pageID: String) {
+        val customer = Prefs(mContext).customer
+        val key = Prefs(mContext).key
+        key?.let { auth_key ->
+            customer?.let { customer ->
+                bannerDataManager.getBannerDetails(auth_key, customer, pageType, pageID)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(object : DisposableObserver<BannerDetails>() {
+                        override fun onNext(bannerDetails: BannerDetails) {
+                            luckyCartListener?.getBannerDetails(bannerDetails)
+                        }
+
+                        override fun onError(e: Throwable) {
+                            Toast.makeText(mContext, "Error: " + e.message, Toast.LENGTH_SHORT)
+                                .show()
+                        }
+
+                        override fun onComplete() {}
+
 
                     })
 
