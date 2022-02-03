@@ -71,6 +71,7 @@ class LuckCartSDK(context: Context) {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(object : DisposableObserver<BannerDetails>() {
                         override fun onNext(bannerDetails: BannerDetails) {
+                            bannerDetails.id = pageID
                             luckyCartListener?.getBannerDetails(bannerDetails)
                         }
 

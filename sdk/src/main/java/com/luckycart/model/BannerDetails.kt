@@ -1,6 +1,7 @@
 package com.luckycart.model
 
 data class BannerDetails(
+    var id : String,
     var image_url: String,
     var redirect_url: String,
     var name: String,
