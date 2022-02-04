@@ -11,16 +11,17 @@ import com.luckycart.retrofit.BannerDataManager
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
+import org.json.JSONObject
 
 class LuckCartSDK(context: Context) {
     var luckyCartListener: LuckyCartListenerCallback? = null
     var mContext = context
     private var bannerDataManager: BannerDataManager = BannerDataManager()
 
-    fun init(authorization: LCAuthorization, customer: String?) {
-        if (customer != null) {
-            Prefs(mContext).customer = customer
-        } else Prefs(mContext).customer = "unknown"
+    fun init(authorization: LCAuthorization, config: JSONObject?) {
+        if (config == null) {
+            Prefs(mContext).customer = "unknown"
+        }
         Prefs(mContext).key = authorization.key
     }
 
@@ -71,7 +72,6 @@ class LuckCartSDK(context: Context) {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(object : DisposableObserver<BannerDetails>() {
                         override fun onNext(bannerDetails: BannerDetails) {
-                            bannerDetails.id = pageID
                             luckyCartListener?.getBannerDetails(bannerDetails)
                         }
 
