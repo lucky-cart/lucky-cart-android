@@ -2,21 +2,25 @@ package com.luckycart.sdk
 
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
+import com.google.gson.JsonObject
 import com.luckycart.local.Prefs
-import com.luckycart.model.BannerDetails
-import com.luckycart.model.Banners
-import com.luckycart.model.LCAuthorization
+import com.luckycart.model.*
 import com.luckycart.retrofit.BannerDataManager
+import com.luckycart.retrofit.card.TransactionDataManager
+import com.luckycart.utils.HmacSignature
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import org.json.JSONObject
+import java.util.*
 
 class LuckCartSDK(context: Context) {
     var luckyCartListener: LuckyCartListenerCallback? = null
     var mContext = context
     private var bannerDataManager: BannerDataManager = BannerDataManager()
+    private var transactionDataManager: TransactionDataManager = TransactionDataManager()
 
     fun init(authorization: LCAuthorization, config: JSONObject?) {
         if (config == null) {
@@ -87,6 +91,34 @@ class LuckCartSDK(context: Context) {
 
             }
         }
+    }
+
+    fun sendCard(cardId: String, ttc: Float) {
+        val key = Prefs(mContext).key
+        val customerId = Prefs(mContext).customer
+        val timesTamp = (Date().time / 1000).toString()
+        val sign = HmacSignature().generateSignature(timesTamp)
+        val authV = "2.0"
+        var cardTransaction = Card(key, timesTamp, sign, authV, cardId, customerId, ttc)
+        transactionDataManager.sendCard(cardTransaction)
+            .subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(object : DisposableObserver<TransactionResponse>() {
+                override fun onNext(response: TransactionResponse) {
+                    luckyCartListener?.sendCard(response)
+                }
+
+                override fun onError(e: Throwable) {
+                    Toast.makeText(mContext, "Error: " + e.message, Toast.LENGTH_SHORT)
+                        .show()
+                }
+
+                override fun onComplete() {
+                }
+
+
+            })
+
     }
 
 }
