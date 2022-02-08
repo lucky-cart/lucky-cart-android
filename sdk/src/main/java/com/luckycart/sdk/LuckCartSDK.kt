@@ -117,4 +117,29 @@ class LuckCartSDK(context: Context) {
         }
     }
 
+    fun getGame(cardID: String) {
+        val customerId = Prefs(mContext).customer
+        Prefs(mContext).key?.let { key ->
+            customerId?.let {
+                transactionDataManager.getGames(key, cardID, it)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(object : DisposableObserver<GameResponse>() {
+                        override fun onNext(listGame: GameResponse) {
+                            luckyCartListener?.getGame(listGame)
+                        }
+
+                        override fun onError(e: Throwable) {
+                            Toast.makeText(mContext, "Error: " + e.message, Toast.LENGTH_SHORT)
+                                .show()
+                        }
+
+                        override fun onComplete() {
+                        }
+
+                    })
+            }
+        }
+    }
+
 }

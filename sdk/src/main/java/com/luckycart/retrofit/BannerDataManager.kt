@@ -10,7 +10,13 @@ class BannerDataManager {
     fun listAvailableBanners(key: String, customerId: String): Observable<Banners> {
         return apiManager.apiService.listAvailableBanners(key, customerId)
     }
-    fun getBannerDetails(key: String, customerId: String,pageType : String , pageId: String): Observable<BannerDetails> {
-        return apiManager.apiService.getBannerDetails(key, customerId,pageType,pageId)
+
+    fun getBannerDetails(
+        key: String,
+        customerId: String,
+        pageType: String,
+        pageId: String
+    ): Observable<BannerDetails> {
+        return apiManager.apiService.getBannerDetails(key, customerId, pageType, pageId)
     }
 }

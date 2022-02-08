@@ -12,6 +12,7 @@ interface ApiService {
         @Path("auth_key") auth_key: String,
         @Path("customerId") customerId: String
     ): Observable<Banners>
+
     @GET("{auth_key}/{customerId}/banner/mobile/{page_type}/{page_id}")
     fun getBannerDetails(
         @Path("auth_key") auth_key: String,

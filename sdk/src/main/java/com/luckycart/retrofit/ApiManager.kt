@@ -1,5 +1,6 @@
 package com.luckycart.retrofit
 
+import com.luckycart.utils.BASE_URL_BANNER
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -35,7 +36,7 @@ class ApiManager {
 
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://promomatching.luckycart.com/")
+            .baseUrl(BASE_URL_BANNER)
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .client(okHttpClient)
