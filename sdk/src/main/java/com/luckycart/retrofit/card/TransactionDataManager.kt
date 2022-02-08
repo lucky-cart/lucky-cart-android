@@ -1,7 +1,6 @@
 package com.luckycart.retrofit.card
 
 
-import com.google.gson.JsonObject
 import com.luckycart.model.Card
 import com.luckycart.model.TransactionResponse
 import io.reactivex.Observable
