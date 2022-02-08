@@ -6,6 +6,7 @@ import com.luckycart.model.GameResponse
 import com.luckycart.model.TransactionResponse
 
 interface LuckyCartListenerCallback {
+
     fun listAvailableBanners(banners: Banners)
     fun getBannerDetails(banners: BannerDetails)
     fun sendCard(transactionResponse: TransactionResponse)

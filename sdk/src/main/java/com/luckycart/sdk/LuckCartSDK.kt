@@ -1,6 +1,5 @@
 package com.luckycart.sdk
 
-
 import android.content.Context
 import android.widget.Toast
 import com.luckycart.local.Prefs
@@ -15,6 +14,7 @@ import org.json.JSONObject
 import java.util.*
 
 class LuckCartSDK(context: Context) {
+
     var luckyCartListener: LuckyCartListenerCallback? = null
     var mContext = context
     private var bannerDataManager: BannerDataManager = BannerDataManager()
@@ -43,8 +43,7 @@ class LuckCartSDK(context: Context) {
         key?.let { auth_key ->
             customer?.let { customer ->
                 bannerDataManager.listAvailableBanners(auth_key, customer)
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(object : DisposableObserver<Banners>() {
                         override fun onNext(banners: Banners) {
                             luckyCartListener?.listAvailableBanners(banners)
@@ -59,7 +58,6 @@ class LuckCartSDK(context: Context) {
                         override fun onComplete() {}
 
                     })
-
             }
         }
     }
@@ -70,8 +68,7 @@ class LuckCartSDK(context: Context) {
         key?.let { auth_key ->
             customer?.let { customer ->
                 bannerDataManager.getBannerDetails(auth_key, customer, pageType, pageID)
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(object : DisposableObserver<BannerDetails>() {
                         override fun onNext(bannerDetails: BannerDetails) {
                             luckyCartListener?.getBannerDetails(bannerDetails)
@@ -86,7 +83,6 @@ class LuckCartSDK(context: Context) {
 
 
                     })
-
             }
         }
     }
@@ -98,8 +94,7 @@ class LuckCartSDK(context: Context) {
         val authV = "2.0"
         Prefs(mContext).key?.let { key ->
             val cardTransaction = Card(key, timesTamp, sign, authV, cardId, customerId, ttc)
-            transactionDataManager.sendCard(cardTransaction)
-                .subscribeOn(Schedulers.newThread())
+            transactionDataManager.sendCard(cardTransaction).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<TransactionResponse>() {
                     override fun onNext(response: TransactionResponse) {
@@ -107,8 +102,7 @@ class LuckCartSDK(context: Context) {
                     }
 
                     override fun onError(e: Throwable) {
-                        Toast.makeText(mContext, "Error: " + e.message, Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(mContext, "Error: " + e.message, Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onComplete() {
@@ -121,8 +115,7 @@ class LuckCartSDK(context: Context) {
         val customerId = Prefs(mContext).customer
         Prefs(mContext).key?.let { key ->
             customerId?.let {
-                transactionDataManager.getGames(key, cardID, it)
-                    .subscribeOn(Schedulers.newThread())
+                transactionDataManager.getGames(key, cardID, it).subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(object : DisposableObserver<GameResponse>() {
                         override fun onNext(listGame: GameResponse) {

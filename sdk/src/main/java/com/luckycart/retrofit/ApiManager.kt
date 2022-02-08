@@ -13,8 +13,8 @@ class ApiManager {
     val apiService: ApiService
 
     companion object {
-        private var apiManager: ApiManager? = null
 
+        private var apiManager: ApiManager? = null
         val instance: ApiManager
             get() {
                 if (apiManager == null) {
@@ -27,20 +27,12 @@ class ApiManager {
     init {
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
-
         val okHttpClient = OkHttpClient.Builder().connectTimeout(1, TimeUnit.MINUTES)
             .writeTimeout(1, TimeUnit.MINUTES) // write timeout
-            .readTimeout(1, TimeUnit.MINUTES)
-            .addInterceptor(interceptor)
-            .build()
-
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL_BANNER)
+            .readTimeout(1, TimeUnit.MINUTES).addInterceptor(interceptor).build()
+        val retrofit = Retrofit.Builder().baseUrl(BASE_URL_BANNER)
             .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .client(okHttpClient)
-            .build()
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create()).client(okHttpClient).build()
 
         apiService = retrofit.create(ApiService::class.java)
     }

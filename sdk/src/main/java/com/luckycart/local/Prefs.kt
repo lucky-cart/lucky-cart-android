@@ -2,13 +2,12 @@ package com.luckycart.local
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.luckycart.model.Banners
 import com.google.gson.Gson
-
+import com.luckycart.model.Banners
 
 class Prefs(context: Context) {
-    var gson = Gson()
 
+    private var gson = Gson()
     private val preferences: SharedPreferences =
         context.getSharedPreferences("PREFERENCE_SDK", Context.MODE_PRIVATE)
     var customer: String?

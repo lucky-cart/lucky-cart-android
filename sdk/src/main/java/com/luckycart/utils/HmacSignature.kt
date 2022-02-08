@@ -1,16 +1,14 @@
 package com.luckycart.utils
 
-import java.lang.StringBuilder
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 class HmacSignature {
-    fun generateSignature(payload: String): String {
 
+    fun generateSignature(payload: String): String {
         return Mac.getInstance(HMAC_ALGORITHM)
             .apply { init(SecretKeySpec(AUTH_SECRET.toByteArray(), algorithm)) }
-            .run { doFinal(payload.toByteArray()) }
-            .let { byteArrayToHex(it) }
+            .run { doFinal(payload.toByteArray()) }.let { byteArrayToHex(it) }
     }
 
     private fun byteArrayToHex(a: ByteArray): String {
