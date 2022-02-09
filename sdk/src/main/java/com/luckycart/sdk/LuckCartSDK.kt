@@ -2,6 +2,7 @@ package com.luckycart.sdk
 
 import android.content.Context
 import android.widget.Toast
+import com.google.gson.JsonObject
 import com.luckycart.local.Prefs
 import com.luckycart.model.*
 import com.luckycart.retrofit.BannerDataManager
@@ -12,6 +13,7 @@ import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import org.json.JSONObject
 import java.util.*
+
 
 class LuckCartSDK(context: Context) {
 
@@ -87,14 +89,20 @@ class LuckCartSDK(context: Context) {
         }
     }
 
-    fun sendCard(cardId: String, ttc: Float) {
+    fun sendCard(card: JsonObject) {
         val customerId = Prefs(mContext).customer
         val timesTamp = (Date().time / 1000).toString()
         val sign = HmacSignature().generateSignature(timesTamp)
         val authV = "2.0"
+        val cardTransaction = JsonObject()
         Prefs(mContext).key?.let { key ->
-            val cardTransaction = Card(key, timesTamp, sign, authV, cardId, customerId, ttc)
-            transactionDataManager.sendCard(cardTransaction).subscribeOn(Schedulers.newThread())
+            cardTransaction.addProperty("auth_key", key)
+            cardTransaction.addProperty("auth_ts", timesTamp)
+            cardTransaction.addProperty("auth_sign", sign)
+            cardTransaction.addProperty("auth_v", authV)
+            cardTransaction.addProperty("customerId", customerId)
+            transactionDataManager.sendCard(deepMerge(card, cardTransaction))
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<TransactionResponse>() {
                     override fun onNext(response: TransactionResponse) {
@@ -135,4 +143,23 @@ class LuckCartSDK(context: Context) {
         }
     }
 
+    private fun deepMerge(source: JsonObject, target: JsonObject): JsonObject {
+        for ((key, value) in source.entrySet()) {
+            if (!target.has(key)) {
+                if (!value.isJsonNull)
+                    target.add(key, value)
+            } else {
+                if (!value.isJsonNull) {
+                    if (value.isJsonObject) {
+                        deepMerge(value.asJsonObject, target[key].asJsonObject)
+                    } else {
+                        target.add(key, value)
+                    }
+                } else {
+                    target.remove(key)
+                }
+            }
+        }
+        return target
+    }
 }
