@@ -7,6 +7,7 @@ import com.luckycart.local.Prefs
 import com.luckycart.model.*
 import com.luckycart.retrofit.BannerDataManager
 import com.luckycart.retrofit.card.TransactionDataManager
+import com.luckycart.utils.AUTH_V
 import com.luckycart.utils.HmacSignature
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
@@ -93,13 +94,12 @@ class LuckCartSDK(context: Context) {
         val customerId = Prefs(mContext).customer
         val timesTamp = (Date().time / 1000).toString()
         val sign = HmacSignature().generateSignature(timesTamp)
-        val authV = "2.0"
         val cardTransaction = JsonObject()
         Prefs(mContext).key?.let { key ->
             cardTransaction.addProperty("auth_key", key)
             cardTransaction.addProperty("auth_ts", timesTamp)
             cardTransaction.addProperty("auth_sign", sign)
-            cardTransaction.addProperty("auth_v", authV)
+            cardTransaction.addProperty("auth_v", AUTH_V)
             cardTransaction.addProperty("customerId", customerId)
             transactionDataManager.sendCard(deepMerge(card, cardTransaction))
                 .subscribeOn(Schedulers.newThread())
