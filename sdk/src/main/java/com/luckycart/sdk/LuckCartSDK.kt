@@ -131,8 +131,7 @@ class LuckCartSDK(context: Context) {
                         }
 
                         override fun onError(e: Throwable) {
-                            Toast.makeText(mContext, "Error: " + e.message, Toast.LENGTH_SHORT)
-                                .show()
+                            luckyCartListener?.onError(e.message)
                         }
 
                         override fun onComplete() {

@@ -11,4 +11,6 @@ interface LuckyCartListenerCallback {
     fun getBannerDetails(banners: BannerDetails)
     fun sendCard(transactionResponse: TransactionResponse)
     fun getGame(game: GameResponse)
+    fun onError(error: String?)
+
 }
