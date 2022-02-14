@@ -11,5 +11,8 @@ implementation "com.squareup.retrofit2:adapter-rxjava2:2.6.1"
 implementation "io.reactivex.rxjava2:rxkotlin:2.2.0"
 implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
 
-LuckyCart will always use latest "master" (stable) versions of theses dependencies.
+LuckyCartSample will always use latest "master" (stable) versions of theses dependencies.
+https://github.com/lucky-cart/lucky-cart-client-sample-android
+
+
 
