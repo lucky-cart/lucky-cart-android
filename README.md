@@ -34,6 +34,16 @@ implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
 LuckyCartSample will always use latest "master" (stable) versions of theses dependencies.
 https://github.com/lucky-cart/lucky-cart-client-sample-android
 
+## Download or clone the sample application
+
+All the sample code in this documentation is extracted from the project LuckyCartSample :https://github.com/lucky-cart/lucky-cart-client-sample-android
+
+It is a simple shopping application draft using a trivial shop model ( Shop, Customer, Cart, Products and Orders ).
+
+   <img width="500" alt="Screen Shot 2022-02-16 at 12 30 59" src="https://user-images.githubusercontent.com/2062107/154256472-5b7da013-7f2e-4655-b90c-343f20ee31a5.png">
+
+
+
 ## Use in Client Application
 
 1-You can use class LuckCartSDK to initialize LuckyCart, generate the data required by the LuckyCart platform and send cart data to the LuckyCart server.
