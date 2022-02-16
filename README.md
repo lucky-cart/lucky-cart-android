@@ -23,20 +23,22 @@ implementation 'com.github.lucky-cart:lucky-cart-android:1.0.0'
 Method 2- ADD file .aar library:
 
 Add those libraries in your gradle file :
+
+```
 implementation files('libs/sdk-release.aar')
 implementation "com.squareup.retrofit2:converter-gson:2.6.1"
 implementation "com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2"
 implementation "com.squareup.retrofit2:adapter-rxjava2:2.6.1"
 implementation "io.reactivex.rxjava2:rxkotlin:2.2.0"
 implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
-
+```
 
 LuckyCartSample will always use latest "master" (stable) versions of theses dependencies.
 https://github.com/lucky-cart/lucky-cart-client-sample-android
 
 ## Download or clone the sample application
 
-All the sample code in this documentation is extracted from the project LuckyCartSample :https://github.com/lucky-cart/lucky-cart-client-sample-android
+All the sample code in this documentation is extracted from the project <a href="https://github.com/lucky-cart/lucky-cart-client-sample-android" target="_blank">LuckyCartSample</a>
 
 It is a simple shopping application draft using a trivial shop model ( Shop, Customer, Cart, Products and Orders ).
 
