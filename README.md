@@ -1,6 +1,6 @@
 ## Requirements
 - You must use AndroidStudio or Eclipse
-- You must download the aar file: https://github.com/lucky-cart/lucky-cart-android/tree/master/sdk/releases/v-1.0.1
+- You can find the aar file here : https://github.com/lucky-cart/lucky-cart-android/tree/master/sdk/releases/v-1.0.1
 
 
 ## Dependencies
@@ -55,7 +55,7 @@ luckyCartSDK?.init(auth, null)
 
 ```
       
-LuckyCartListenerCallback is an interface wich contains response receive from LuckCart server
+LuckyCartListenerCallback is an interface which contains response receive from LuckCart server
 
 ```
 interface LuckyCartListenerCallback {
