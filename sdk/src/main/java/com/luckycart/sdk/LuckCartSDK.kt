@@ -6,7 +6,7 @@ import com.google.gson.JsonObject
 import com.luckycart.local.Prefs
 import com.luckycart.model.*
 import com.luckycart.retrofit.BannerDataManager
-import com.luckycart.retrofit.card.TransactionDataManager
+import com.luckycart.retrofit.cart.TransactionDataManager
 import com.luckycart.utils.AUTH_V
 import com.luckycart.utils.HmacSignature
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -122,11 +122,11 @@ class LuckCartSDK(context: Context) {
         }
     }
 
-    fun getGame(cardID: String) {
+    fun getGame(cartID: String) {
         val customerId = Prefs(mContext).customer
         Prefs(mContext).key?.let { key ->
             customerId?.let {
-                transactionDataManager.getGames(key, cardID, it).subscribeOn(Schedulers.newThread())
+                transactionDataManager.getGames(key, cartID, it).subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(object : DisposableObserver<GameResponse>() {
                         override fun onNext(listGame: GameResponse) {

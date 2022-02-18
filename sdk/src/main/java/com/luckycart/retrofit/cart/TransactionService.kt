@@ -1,4 +1,4 @@
-package com.luckycart.retrofit.card
+package com.luckycart.retrofit.cart
 
 import com.google.gson.JsonObject
 import com.luckycart.model.GameResponse

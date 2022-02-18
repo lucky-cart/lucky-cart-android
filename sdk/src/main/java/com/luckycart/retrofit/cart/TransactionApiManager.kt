@@ -1,6 +1,6 @@
-package com.luckycart.retrofit.card
+package com.luckycart.retrofit.cart
 
-import com.luckycart.utils.BASE_URL_CARD
+import com.luckycart.utils.BASE_URL_CART
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -31,7 +31,7 @@ class TransactionApiManager {
             .writeTimeout(1, TimeUnit.MINUTES) // write timeout
             .readTimeout(1, TimeUnit.MINUTES).addInterceptor(interceptor)
             .addNetworkInterceptor(BasicHeaderInterceptor()).build()
-        val retrofit = Retrofit.Builder().baseUrl(BASE_URL_CARD)
+        val retrofit = Retrofit.Builder().baseUrl(BASE_URL_CART)
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create()).client(okHttpClient).build()
 
