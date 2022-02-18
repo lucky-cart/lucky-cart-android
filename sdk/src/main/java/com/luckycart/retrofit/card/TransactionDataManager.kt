@@ -8,8 +8,8 @@ import io.reactivex.Observable
 class TransactionDataManager {
 
     private var transactionApiManager = TransactionApiManager.instance
-    fun sendCard(card: JsonObject?): Observable<TransactionResponse> {
-        return transactionApiManager.transactionService.sendCard(card)
+    fun sendCart(cart: JsonObject?): Observable<TransactionResponse> {
+        return transactionApiManager.transactionService.sendCart(cart)
     }
 
     fun getGames(key: String, cardId: String, customerId: String): Observable<GameResponse> {

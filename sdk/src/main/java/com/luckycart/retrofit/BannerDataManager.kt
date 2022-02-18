@@ -13,8 +13,8 @@ class BannerDataManager {
     }
 
     fun getBannerDetails(
-        key: String, customerId: String, pageType: String, pageId: String
+        key: String, customerId: String, pageType: String,pageId: String
     ): Observable<BannerDetails> {
-        return apiManager.apiService.getBannerDetails(key, customerId, pageType, pageId)
+        return apiManager.apiService.getBannerDetails(key, customerId, pageType,pageId)
     }
 }

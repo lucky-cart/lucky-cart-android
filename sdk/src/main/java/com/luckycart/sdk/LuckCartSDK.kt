@@ -65,12 +65,15 @@ class LuckCartSDK(context: Context) {
         }
     }
 
-    fun getBannerDetails(pageType: String, pageID: String) {
+    fun getBannerDetails(pageType: String,format:String, pageID: String) {
+        val formatPage: String = if (pageID.isEmpty())
+            format
+        else format+"_"+pageID
         val customer = Prefs(mContext).customer
         val key = Prefs(mContext).key
         key?.let { auth_key ->
             customer?.let { customer ->
-                bannerDataManager.getBannerDetails(auth_key, customer, pageType, pageID)
+                bannerDataManager.getBannerDetails(auth_key, customer, pageType,formatPage)
                     .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(object : DisposableObserver<BannerDetails>() {
                         override fun onNext(bannerDetails: BannerDetails) {
@@ -90,23 +93,23 @@ class LuckCartSDK(context: Context) {
         }
     }
 
-    fun sendCard(card: JsonObject) {
+    fun sendCart(cart: JsonObject) {
         val customerId = Prefs(mContext).customer
         val timesTamp = (Date().time / 1000).toString()
         val sign = HmacSignature().generateSignature(timesTamp)
-        val cardTransaction = JsonObject()
+        val cartTransaction = JsonObject()
         Prefs(mContext).key?.let { key ->
-            cardTransaction.addProperty("auth_key", key)
-            cardTransaction.addProperty("auth_ts", timesTamp)
-            cardTransaction.addProperty("auth_sign", sign)
-            cardTransaction.addProperty("auth_v", AUTH_V)
-            cardTransaction.addProperty("customerId", customerId)
-            transactionDataManager.sendCard(deepMerge(card, cardTransaction))
+            cartTransaction.addProperty("auth_key", key)
+            cartTransaction.addProperty("auth_ts", timesTamp)
+            cartTransaction.addProperty("auth_sign", sign)
+            cartTransaction.addProperty("auth_v", AUTH_V)
+            cartTransaction.addProperty("customerId", customerId)
+            transactionDataManager.sendCart(deepMerge(cart, cartTransaction))
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<TransactionResponse>() {
                     override fun onNext(response: TransactionResponse) {
-                        luckyCartListener?.sendCard(response)
+                        luckyCartListener?.sendCart(response)
                     }
 
                     override fun onError(e: Throwable) {
