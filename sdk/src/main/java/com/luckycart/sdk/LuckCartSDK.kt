@@ -49,13 +49,12 @@ class LuckCartSDK(context: Context) {
                     .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(object : DisposableObserver<Banners>() {
                         override fun onNext(banners: Banners) {
-                            luckyCartListener?.listAvailableBanners(banners)
                             Prefs(mContext).banners = banners
+                            luckyCartListener?.onRecieveListAvailableBanners(banners)
                         }
 
                         override fun onError(e: Throwable) {
-                            Toast.makeText(mContext, "Error: " + e.message, Toast.LENGTH_SHORT)
-                                .show()
+                            luckyCartListener?.onError(e.message)
                         }
 
                         override fun onComplete() {}
@@ -77,7 +76,7 @@ class LuckCartSDK(context: Context) {
                     .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(object : DisposableObserver<BannerDetails>() {
                         override fun onNext(bannerDetails: BannerDetails) {
-                            luckyCartListener?.getBannerDetails(bannerDetails)
+                            luckyCartListener?.onRecieveBannerDetails(bannerDetails)
                         }
 
                         override fun onError(e: Throwable) {
@@ -109,7 +108,7 @@ class LuckCartSDK(context: Context) {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<TransactionResponse>() {
                     override fun onNext(response: TransactionResponse) {
-                        luckyCartListener?.sendCart(response)
+                        luckyCartListener?.onRecieveSendCartTransactionResponse(response)
                     }
 
                     override fun onError(e: Throwable) {
@@ -130,7 +129,7 @@ class LuckCartSDK(context: Context) {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(object : DisposableObserver<GameResponse>() {
                         override fun onNext(listGame: GameResponse) {
-                            luckyCartListener?.getGame(listGame)
+                            luckyCartListener?.onRecieveListGames(listGame)
                         }
 
                         override fun onError(e: Throwable) {
