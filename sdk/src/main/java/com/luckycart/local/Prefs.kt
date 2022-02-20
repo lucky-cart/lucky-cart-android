@@ -16,7 +16,7 @@ class Prefs(context: Context) {
     var key: String?
         get() = preferences.getString("key", "")
         set(value) = preferences.edit().putString("key", value).apply()
-    var banners: Banners
+    var banners: Banners?
         get() = gson.fromJson(preferences.getString("listBanner", ""), Banners::class.java)
         set(value) = preferences.edit().putString("listBanner", gson.toJson(value)).apply()
 

@@ -1,4 +1,4 @@
-package com.luckycart.retrofit.card
+package com.luckycart.retrofit.cart
 
 import com.google.gson.JsonObject
 import com.luckycart.model.GameResponse
@@ -12,7 +12,7 @@ import retrofit2.http.Query
 interface TransactionService {
 
     @POST("cart/ticket.json")
-    fun sendCard(@Body card: JsonObject?): Observable<TransactionResponse>
+    fun sendCart(@Body cart: JsonObject?): Observable<TransactionResponse>
 
     @GET("cart/games")
     fun getGames(

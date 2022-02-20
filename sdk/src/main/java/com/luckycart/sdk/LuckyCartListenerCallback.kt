@@ -7,10 +7,10 @@ import com.luckycart.model.TransactionResponse
 
 interface LuckyCartListenerCallback {
 
-    fun listAvailableBanners(banners: Banners)
-    fun getBannerDetails(banners: BannerDetails)
-    fun sendCard(transactionResponse: TransactionResponse)
-    fun getGame(game: GameResponse)
+    fun onRecieveListAvailableBanners(banners: Banners)
+    fun onRecieveBannerDetails(bannerDetails: BannerDetails)
+    fun onRecieveSendCartTransactionResponse(transactionResponse: TransactionResponse)
+    fun onRecieveListGames(gameResponse: GameResponse)
     fun onError(error: String?)
 
 }

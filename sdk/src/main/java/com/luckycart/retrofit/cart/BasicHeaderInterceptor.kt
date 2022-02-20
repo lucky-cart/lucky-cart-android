@@ -1,4 +1,4 @@
-package com.luckycart.retrofit.card
+package com.luckycart.retrofit.cart
 
 import okhttp3.Interceptor
 import okhttp3.Response
