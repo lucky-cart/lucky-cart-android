@@ -12,8 +12,8 @@ android {
     defaultConfig {
         minSdk 21
         targetSdk 31
-        versionCode 4
-        versionName "1.0.4"
+        versionCode 12
+        versionName "1.0.12"
     }
 
     buildTypes {
@@ -25,6 +25,10 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = '11'
     }
 }
 
@@ -48,9 +52,9 @@ afterEvaluate {
             // Creates a Maven publication called "release".
             release(MavenPublication) {
                 from components.release
-                groupId = 'com.github.souissihaythem'
-                artifactId = 'luckycart'
-                version = '1.0.4'
+                groupId = 'com.github.lucky-cart'
+                artifactId = 'lucky-cart-android'
+                version = '1.0.12'
             }
         }
     }
