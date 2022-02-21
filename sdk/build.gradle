@@ -22,13 +22,6 @@ android {
         }
     }
 
-    android.variantFilter { variant ->
-        def build = variant.buildType.name
-        if (build == "debug") {
-            variant.setIgnore(true)
-        }
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
