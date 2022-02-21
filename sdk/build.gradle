@@ -12,8 +12,8 @@ android {
     defaultConfig {
         minSdk 21
         targetSdk 31
-        versionCode 11
-        versionName "1.0.11"
+        versionCode 12
+        versionName "1.0.12"
     }
 
     buildTypes {
@@ -52,9 +52,9 @@ afterEvaluate {
             // Creates a Maven publication called "release".
             release(MavenPublication) {
                 from components.release
-                groupId = 'com.github.souissihaythem'
+                groupId = 'com.github.lucky-cart'
                 artifactId = 'lucky-cart-android'
-                version = '1.0.11'
+                version = '1.0.12'
             }
         }
     }
