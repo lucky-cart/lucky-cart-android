@@ -12,20 +12,13 @@ android {
     defaultConfig {
         minSdk 21
         targetSdk 31
-        versionCode 13
-        versionName "1.0.13"
+        versionCode 14
+        versionName "1.0.14"
     }
 
     buildTypes {
         release {
             minifyEnabled false
-        }
-    }
-
-    android.variantFilter { variant ->
-        def build = variant.buildType.name
-        if (build == "debug") {
-            variant.setIgnore(true)
         }
     }
 
@@ -67,7 +60,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.lucky-cart'
                 artifactId = 'lucky-cart-android'
-                version = '1.0.13'
+                version = '1.0.14'
             }
         }
     }
