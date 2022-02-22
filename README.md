@@ -69,6 +69,12 @@ You can then add a banner in your layout:
     android:layout_width="match_parent"
     android:layout_height="wrap_content" />
 ```
+
+then send the bannner details:
+
+```
+bannerView.setBannerParams(bannerDetails, clickListner)
+```
       
 LuckyCartListenerCallback is an interface which contains response receive from LuckCart server, this is managed in the SDK
 no need to create LuckyCartListenerCallback.
