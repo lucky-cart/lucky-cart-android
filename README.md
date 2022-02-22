@@ -48,26 +48,69 @@ It is a simple shopping application draft using a trivial shop model ( Shop, Cus
 
 ## Use in Client Application
 
-1-You can use class LuckCartSDK to initialize LuckyCart, generate the data required by the LuckyCart platform and send cart data to the LuckyCart server.
+1- In your viewModel (or Activity, fragment, ...), You can use class LuckCartSDK.
+Just first initialize LuckyCart by sending the data required by the LuckyCart platform.
 
 ```
-var luckyCartSDK: LuckCartSDK? = null
-luckyCartSDK = LuckCartSDK(mContext)
-luckyCartSDK?.init(auth, null)
+class MainViewModel : ViewModel() {
+   var luckyCartSDK: LuckCartSDK? = null
+   const val AUTH_KEY = "ugjArgGw"
 
+   fun initLuckyCart() {
+       val auth = LCAuthorization(AUTH_KEY, "")
+       val config = null
+       luckyCartSDK = LuckCartSDK(mContext)
+       luckyCartSDK?.init(auth, config)
+   
+   }
+}
 ```
       
 LuckyCartListenerCallback is an interface which contains response receive from LuckCart server
 
 ```
 interface LuckyCartListenerCallback {
-   fun listAvailableBanners(banners: Banners)
-   fun getBannerDetails(banners: BannerDetails)
-   fun sendCard(transactionResponse: TransactionResponse)
-   fun getGame(game: GameResponse)
+   fun onRecieveListAvailableBanners(banners: Banners)
+   fun onRecieveBannerDetails(bannerDetails: BannerDetails)
+   fun onRecieveSendCartTransactionResponse(transactionResponse: TransactionResponse)
+   fun onRecieveListGames(gameResponse: GameResponse)
    fun onError(error: String?)
 }
 ```
+
+You will need to implement LuckyCartListenerCallback to recieve and override what happen when you get all those events above
+
+```
+class MainViewModel : ViewModel(), LuckyCartListenerCallback {
+   var luckyCartSDK: LuckCartSDK? = null
+   const val AUTH_KEY = "ugjArgGw"
+
+   fun initLuckyCart() {
+       val auth = LCAuthorization(AUTH_KEY, "")
+       val config = null
+       luckyCartSDK = LuckCartSDK(mContext)
+       luckyCartSDK?.init(auth, config)
+   
+   }
+
+    override fun onRecieveListAvailableBanners(banners: Banners) {
+       // TODO: loadBannerHomePage() in a view
+    }
+    override fun onRecieveBannerDetails(bannerDetails: BannerDetails) {
+       // TODO: show banner details in a view
+    }
+    override fun onRecieveSendCartTransactionResponse(transactionResponse: TransactionResponse)
+       // TODO
+    }
+    override fun onRecieveListGames(gameResponse: GameResponse)
+       // TODO
+    }
+    override fun onError(error: String?)
+       // TODO: show a dialog when you recieve an error
+    }
+}
+```
+
         
 2-Start LuckyCart
 
