@@ -1,40 +1,30 @@
 ## Requirements
-- You must use AndroidStudio or Eclipse
-- You can find the aar file here : https://github.com/lucky-cart/lucky-cart-android/tree/master/sdk/releases/v-1.0.1
+- You need to install AndroidStudio
 
 
 ## Dependencies
 You can implement library luckCart in build.gradle or add file .aar library
 
-Method 1- Gradle Configuration:
+Gradle Configuration:
 
 Add it in your settings.gradle at the end of repositories:
 ```
- maven { url 'https://jitpack.io' }
- 
+dependencyResolutionManagement {
+    repositories {
+        maven {
+            url 'https://jitpack.io'
+        }
+    }
+}
 ```
-Add the dependency
+Add the dependency in your application build.gradle file
 ```
-implementation 'com.github.lucky-cart:lucky-cart-android:1.0.0'
-
-```
-
-
-Method 2- ADD file .aar library:
-
-Add those libraries in your gradle file :
-
-```
-implementation files('libs/sdk-release.aar')
-implementation "com.squareup.retrofit2:converter-gson:2.6.1"
-implementation "com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2"
-implementation "com.squareup.retrofit2:adapter-rxjava2:2.6.1"
-implementation "io.reactivex.rxjava2:rxkotlin:2.2.0"
-implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+dependencies {
+    //luckCart
+    implementation 'com.github.lucky-cart:lucky-cart-android:1.0.14'
+}
 ```
 
-LuckyCartSample will always use latest "master" (stable) versions of theses dependencies.
-https://github.com/lucky-cart/lucky-cart-client-sample-android
 
 ## Download or clone the sample application
 
@@ -48,25 +38,31 @@ It is a simple shopping application draft using a trivial shop model ( Shop, Cus
 
 ## Use in Client Application
 
-1- In your viewModel (or Activity, fragment, ...), You can use class LuckCartSDK.
+1- In your application class, You will need to init your LuckCartSDK, then you will be able to use it everywhere in the project.
 Just first initialize LuckyCart by sending the data required by the LuckyCart platform.
 
 ```
-class MainViewModel : ViewModel() {
-   var luckyCartSDK: LuckCartSDK? = null
-   const val AUTH_KEY = "ugjArgGw"
+class ApplicationSampleLuckyCart: Application() {
 
-   fun initLuckyCart() {
-       val auth = LCAuthorization(AUTH_KEY, "")
-       val config = null
-       luckyCartSDK = LuckCartSDK(mContext)
-       luckyCartSDK?.init(auth, config)
-   
-   }
+    var luckyCartSDK: LuckCartSDK? = null
+
+    override fun onCreate() {
+        super.onCreate()
+        // initialize Lucky SDK here
+        val auth = LCAuthorization(AUTH_KEY, "")
+        luckyCartSDK = LuckCartSDK(applicationContext)
+        luckyCartSDK?.init(auth, null)
+        luckyCartSDK?.setUser(CUSTOMER_ID)
+        // get list of available banners when application start
+        luckyCartSDK?.listAvailableBanners() 
+        // list of available banners will be saved in a shared preference in the SDK and will accessible from any class in the project
+    }
+
 }
 ```
       
-LuckyCartListenerCallback is an interface which contains response receive from LuckCart server
+LuckyCartListenerCallback is an interface which contains response receive from LuckCart server, this is managed in the SDK
+no need to create LuckyCartListenerCallback.
 
 ```
 interface LuckyCartListenerCallback {
@@ -82,33 +78,63 @@ You will need to implement LuckyCartListenerCallback to recieve and override wha
 
 ```
 class MainViewModel : ViewModel(), LuckyCartListenerCallback {
+
+   private lateinit var mContext: Context
    var luckyCartSDK: LuckCartSDK? = null
-   const val AUTH_KEY = "ugjArgGw"
 
-   fun initLuckyCart() {
-       val auth = LCAuthorization(AUTH_KEY, "")
-       val config = null
-       luckyCartSDK = LuckCartSDK(mContext)
-       luckyCartSDK?.init(auth, config)
-   
+   fun setContext(context: Context) {
+        mContext = context
+        // Get luckyCart instance
+        luckyCartSDK = (mContext.applicationContext as ApplicationSampleLuckyCart).luckyCartSDK
+        luckyCartSDK?.setActionListener(this)
    }
+   
+   private fun loadBannerHomePage() {
+        getBannerCategory = false
+        Prefs(mContext).banners?.homepage?.forEach { format ->
+            luckyCartSDK?.getBannerDetails(BANNER_HOMEPAGE, format, "")
+        }
+    }
+    
+    fun loadBannerCategory(pageId: String) {
+        getBannerCategory = true
+        Prefs(mContext).banners?.categories?.forEach {
+            if (it.contains(pageId) && !it.contains("search")) luckyCartSDK?.getBannerDetails(
+                BANNER_CATEGORIES,
+                it,
+                ""
+            )
+        }
+    }
+   
+   override fun onRecieveListAvailableBanners(banners: Banners) {
+        loadBannerHomePage()
+    }
 
-    override fun onRecieveListAvailableBanners(banners: Banners) {
-       // TODO: loadBannerHomePage() in a view
-    }
     override fun onRecieveBannerDetails(bannerDetails: BannerDetails) {
-       // TODO: show banner details in a view
+        if (bannerDetails.name != null) {
+            if (getBannerCategory) {
+                getBannerCategoryDetails.value = GetBannerState.OnSuccess(bannerDetails)
+            } else getBannerDetails.value = GetBannerState.OnSuccess(bannerDetails)
+        } else {
+            getBannerCategoryDetails.value = GetBannerState.OnError("error")
+        }
     }
-    override fun onRecieveSendCartTransactionResponse(transactionResponse: TransactionResponse)
-       // TODO
+    
+    override fun onRecieveSendCartTransactionResponse(transactionResponse: TransactionResponse) {
+        luckyCartSDK?.getGame(cartID)
     }
-    override fun onRecieveListGames(gameResponse: GameResponse)
-       // TODO
+
+    override fun onRecieveListGames(gameResponse: GameResponse) {
+        (mContext as MainActivity).showFragmentGame(gameResponse.games)
     }
-    override fun onError(error: String?)
-       // TODO: show a dialog when you recieve an error
+
+    override fun onError(error: String?) {
+        Toast.makeText(mContext, "Error: $error", Toast.LENGTH_SHORT).show()
     }
+    
 }
+
 ```
 
         
