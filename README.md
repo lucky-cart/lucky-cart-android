@@ -60,6 +60,15 @@ class ApplicationSampleLuckyCart: Application() {
 
 }
 ```
+
+You can then add a banner in your layout:
+
+```
+<com.luckycart.views.BannerView
+    android:id="@+id/bannerView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
+```
       
 LuckyCartListenerCallback is an interface which contains response receive from LuckCart server, this is managed in the SDK
 no need to create LuckyCartListenerCallback.
