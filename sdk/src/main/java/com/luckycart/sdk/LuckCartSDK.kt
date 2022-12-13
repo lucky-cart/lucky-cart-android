@@ -41,6 +41,7 @@ class LuckCartSDK(context: Context) {
         luckyCartListener = callBack
     }
 
+    @Deprecated("Use getBannerExperience instead")
     fun listAvailableBanners() {
         val customer = Prefs(mContext).customer
         val key = Prefs(mContext).key
@@ -93,6 +94,7 @@ class LuckCartSDK(context: Context) {
         }
     }
 
+    @Deprecated("Use sendShopperEvent instead with Event Object")
     fun sendCart(cart: JsonObject) {
         val customerId = Prefs(mContext).customer
         val timesTamp = (Date().time / 1000).toString()
@@ -144,6 +146,7 @@ class LuckCartSDK(context: Context) {
             }
         }
     }
+
     @SuppressLint("CheckResult")
     fun sendShopperEvent(event: Event) {
         val customerId = Prefs(mContext).customer
@@ -166,14 +169,15 @@ class LuckCartSDK(context: Context) {
             })
     }
 
+    @SuppressLint("CheckResult")
     fun getBannerExperience(page_type: String,
                             format: String,
                             pageId: String?,
                             store: String,
                             store_type: String){
 
-        val customer = Prefs(mContext).customer
-        val auth_key = Prefs(mContext).key
+        val customer = "2532975"//Prefs(mContext).customer
+        val auth_key = "W1F9jXP2"//Prefs(mContext).key
         if(customer != null && auth_key != null){
 
             dataManager.getBannerExperience(auth_key, customer,
@@ -196,6 +200,35 @@ class LuckCartSDK(context: Context) {
 
                 })
         }
+    }
+
+    @SuppressLint("CheckResult")
+    fun getGamesAccess(siteKey: String,
+                       count: Int?,
+                       filters: GameFilter){
+        val shopperId = Prefs(mContext).customer
+        val countNotNull = count ?: 1
+        if(shopperId != null ){
+
+            dataManager.getGamesAccess(siteKey, shopperId, countNotNull, filters)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(object : DisposableObserver<GameResponse>() {
+
+                    override fun onNext(gameResponse: GameResponse) {
+                        luckyCartListener?.onRecieveListGames(gameResponse)
+                    }
+
+                    override fun onError(e: Throwable) {
+                        luckyCartListener?.onError(e.message)
+                    }
+
+                    override fun onComplete() {
+                    }
+
+                })
+        }
+
     }
 
     private fun deepMerge(source: JsonObject, target: JsonObject): JsonObject {

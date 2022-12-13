@@ -32,7 +32,7 @@ interface ApiService {
         @Path("page_id") page_id: String
     ): Observable<BannerDetails>
 
-    @FormUrlEncoded
+
     @POST("/v1/event")
     fun sendShopperEvent(@Body event: Event): Observable<Void>
 
@@ -43,7 +43,7 @@ interface ApiService {
                        @Field("count") count: Int,
                        @Body filters: GameFilter): Observable<GameResponse>
 
-    @GET("{auth_key}/{customerId}/banners/mobile/{page_type}/{format}/")
+    @GET("{auth_key}/{customerId}/banners/{format}/{page_type}/banner/")
     fun getBannerExperience(@Path("auth_key") auth_key: String,
                             @Path("customerId") customerId: String,
                             @Path("page_type") page_type: String,
