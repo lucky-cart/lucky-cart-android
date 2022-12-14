@@ -9,14 +9,21 @@ import com.luckycart.model.*
 import com.luckycart.retrofit.DataManager
 import com.luckycart.utils.AUTH_V
 import com.luckycart.utils.HmacSignature
-import io.reactivex.android.schedulers.AndroidSchedulers
+import com.luckycart.utils.observeOnMain
+import com.luckycart.utils.retryPolling
+import com.luckycart.utils.subscribeIO
 import io.reactivex.observers.DisposableObserver
-import io.reactivex.schedulers.Schedulers
 import org.json.JSONObject
-import java.util.*
+import java.util.Date
+import java.util.concurrent.TimeUnit
 
 
 class LuckCartSDK(context: Context) {
+
+    private companion object {
+        const val RETRY_AFTER = 500L
+        const val MAX_ATTEMPTS = 5
+    }
 
     var luckyCartListener: LuckyCartListenerCallback? = null
     var mContext = context
@@ -46,7 +53,8 @@ class LuckCartSDK(context: Context) {
         key?.let { auth_key ->
             customer?.let { customer ->
                 dataManager.listAvailableBanners(auth_key, customer)
-                    .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+                    .subscribeIO()
+                    .observeOnMain()
                     .subscribeWith(object : DisposableObserver<Banners>() {
                         override fun onNext(banners: Banners) {
                             Prefs(mContext).banners = banners
@@ -73,7 +81,8 @@ class LuckCartSDK(context: Context) {
         key?.let { auth_key ->
             customer?.let { customer ->
                 dataManager.getBannerDetails(auth_key, customer, pageType,formatPage)
-                    .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+                    .subscribeIO()
+                    .observeOnMain()
                     .subscribeWith(object : DisposableObserver<BannerDetails>() {
                         override fun onNext(bannerDetails: BannerDetails) {
                             luckyCartListener?.onRecieveBannerDetails(bannerDetails)
@@ -105,8 +114,8 @@ class LuckCartSDK(context: Context) {
             cartTransaction.addProperty("auth_v", AUTH_V)
             cartTransaction.addProperty("customerId", customerId)
             dataManager.sendCart(deepMerge(cart, cartTransaction))
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeIO()
+                .observeOnMain()
                 .subscribeWith(object : DisposableObserver<TransactionResponse>() {
                     override fun onNext(response: TransactionResponse) {
                         luckyCartListener?.onRecieveSendCartTransactionResponse(response)
@@ -126,8 +135,9 @@ class LuckCartSDK(context: Context) {
         val customerId = Prefs(mContext).customer
         Prefs(mContext).key?.let { key ->
             customerId?.let {
-                dataManager.getGames(key, cartID, it).subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
+                dataManager.getGames(key, cartID, it)
+                    .subscribeIO()
+                    .observeOnMain()
                     .subscribeWith(object : DisposableObserver<GameResponse>() {
                         override fun onNext(listGame: GameResponse) {
                             luckyCartListener?.onRecieveListGames(listGame)
@@ -149,8 +159,8 @@ class LuckCartSDK(context: Context) {
     fun sendShopperEvent(event: Event) {
         val customerId = Prefs(mContext).customer
         dataManager.sendShopperEvent(event)
-            .subscribeOn(Schedulers.newThread())
-            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeIO()
+            .observeOnMain()
             .subscribeWith(object : DisposableObserver<Void>() {
 
                 override fun onNext(void: Void) {
@@ -177,14 +187,27 @@ class LuckCartSDK(context: Context) {
         val customer = Prefs(mContext).customer
         val auth_key = Prefs(mContext).key
         if(customer != null && auth_key != null){
-
+            var attempt =0
             dataManager.getBannerExperience(auth_key, customer,
                     page_type,
                 format,pageId, store, store_type)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeIO()
+                .observeOnMain()
+                .doOnNext {
+                   if(it.bannerList?.isEmpty() == true && attempt < MAX_ATTEMPTS){
+                       attempt++
+                       throw Exception("Empty Data")
+                   }
+                }
+                .retryPolling(
+                    predicate = { response ->
+                        response is Exception
+                    },
+                    delayBeforeRetry = RETRY_AFTER,
+                    maxRetry = MAX_ATTEMPTS,
+                    timeUnit = TimeUnit.MILLISECONDS
+                )
                 .subscribeWith(object : DisposableObserver<BannerResponse>() {
-
                     override fun onNext(bannerResponse: BannerResponse) {
                         luckyCartListener?.onRecieveListAvailableBanners(bannerResponse)
                     }
@@ -194,9 +217,10 @@ class LuckCartSDK(context: Context) {
                     }
 
                     override fun onComplete() {
-                    }
 
+                    }
                 })
+
         }
     }
 
@@ -207,10 +231,24 @@ class LuckCartSDK(context: Context) {
         val shopperId = Prefs(mContext).customer
         val countNotNull = count ?: 1
         if(shopperId != null ){
-
+            var attempt =0
             dataManager.getGamesAccess(siteKey, shopperId, countNotNull, filters)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeIO()
+                .observeOnMain()
+                .doOnNext {
+                    if(it.games?.isEmpty() == true && attempt < MAX_ATTEMPTS){
+                        attempt++
+                        throw Exception("Empty Data")
+                    }
+                }
+                .retryPolling(
+                    predicate = { response ->
+                        response is Exception
+                    },
+                    delayBeforeRetry = RETRY_AFTER,
+                    maxRetry = MAX_ATTEMPTS,
+                    timeUnit = TimeUnit.MILLISECONDS
+                )
                 .subscribeWith(object : DisposableObserver<GameResponse>() {
 
                     override fun onNext(gameResponse: GameResponse) {
