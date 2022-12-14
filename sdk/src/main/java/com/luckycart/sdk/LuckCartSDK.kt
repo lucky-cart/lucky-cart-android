@@ -7,7 +7,6 @@ import com.google.gson.JsonObject
 import com.luckycart.local.Prefs
 import com.luckycart.model.*
 import com.luckycart.retrofit.DataManager
-import com.luckycart.retrofit.cart.TransactionDataManager
 import com.luckycart.utils.AUTH_V
 import com.luckycart.utils.HmacSignature
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -22,7 +21,6 @@ class LuckCartSDK(context: Context) {
     var luckyCartListener: LuckyCartListenerCallback? = null
     var mContext = context
     private var dataManager: DataManager = DataManager()
-    private var transactionDataManager: TransactionDataManager = TransactionDataManager()
 
     fun init(authorization: LCAuthorization, config: JSONObject?) {
         if (config == null) {
@@ -106,7 +104,7 @@ class LuckCartSDK(context: Context) {
             cartTransaction.addProperty("auth_sign", sign)
             cartTransaction.addProperty("auth_v", AUTH_V)
             cartTransaction.addProperty("customerId", customerId)
-            transactionDataManager.sendCart(deepMerge(cart, cartTransaction))
+            dataManager.sendCart(deepMerge(cart, cartTransaction))
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<TransactionResponse>() {
@@ -128,7 +126,7 @@ class LuckCartSDK(context: Context) {
         val customerId = Prefs(mContext).customer
         Prefs(mContext).key?.let { key ->
             customerId?.let {
-                transactionDataManager.getGames(key, cartID, it).subscribeOn(Schedulers.newThread())
+                dataManager.getGames(key, cartID, it).subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(object : DisposableObserver<GameResponse>() {
                         override fun onNext(listGame: GameResponse) {
@@ -173,11 +171,11 @@ class LuckCartSDK(context: Context) {
     fun getBannerExperience(page_type: String,
                             format: String,
                             pageId: String?,
-                            store: String,
-                            store_type: String){
+                            store: String?,
+                            store_type: String?){
 
-        val customer = "2532975"//Prefs(mContext).customer
-        val auth_key = "W1F9jXP2"//Prefs(mContext).key
+        val customer = Prefs(mContext).customer
+        val auth_key = Prefs(mContext).key
         if(customer != null && auth_key != null){
 
             dataManager.getBannerExperience(auth_key, customer,

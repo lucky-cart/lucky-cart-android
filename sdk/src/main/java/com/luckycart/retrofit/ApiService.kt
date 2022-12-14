@@ -1,11 +1,13 @@
 package com.luckycart.retrofit
 
+import com.google.gson.JsonObject
 import com.luckycart.model.BannerDetails
 import com.luckycart.model.BannerResponse
 import com.luckycart.model.Banners
 import com.luckycart.model.Event
 import com.luckycart.model.GameFilter
 import com.luckycart.model.GameResponse
+import com.luckycart.model.TransactionResponse
 import io.reactivex.Observable
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -32,6 +34,15 @@ interface ApiService {
         @Path("page_id") page_id: String
     ): Observable<BannerDetails>
 
+    @POST("cart/ticket.json")
+    fun sendCart(@Body cart: JsonObject?): Observable<TransactionResponse>
+
+    @GET("cart/games")
+    fun getGames(
+        @Query("authKey") authKey: String,
+        @Query("cartId") cartId: String,
+        @Query("customerId") customerId: String
+    ): Observable<GameResponse>
 
     @POST("/v1/event")
     fun sendShopperEvent(@Body event: Event): Observable<Void>
@@ -49,8 +60,8 @@ interface ApiService {
                             @Path("page_type") page_type: String,
                             @Path("format") format: String,
                             @Query("pageId") pageId: String?,
-                            @Query("store") store: String,
-                            @Query("store_type") store_type: String
+                            @Query("store") store: String?,
+                            @Query("store_type") store_type: String?
     ): Observable<BannerResponse>
 
 }

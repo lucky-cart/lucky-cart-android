@@ -1,6 +1,5 @@
 package com.luckycart.retrofit
 
-import com.luckycart.retrofit.cart.TransactionService
 import com.luckycart.utils.BASE_URL_BANNER
 import com.luckycart.utils.BASE_URL_CART
 import com.luckycart.utils.BASE_URL_DISPLAYER
@@ -43,8 +42,8 @@ class ApiManager {
         retrofitInstance(BASE_URL_BANNER).create(ApiService::class.java)
     }
 
-    val cartApi: TransactionService by lazy {
-        retrofitInstance(BASE_URL_CART).create(TransactionService::class.java)
+    val cartApi: ApiService by lazy {
+        retrofitInstance(BASE_URL_CART).create(ApiService::class.java)
     }
 
     val shopperApi: ApiService by lazy {
