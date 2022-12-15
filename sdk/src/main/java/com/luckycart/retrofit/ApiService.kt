@@ -5,6 +5,7 @@ import com.luckycart.model.BannerDetails
 import com.luckycart.model.BannerResponse
 import com.luckycart.model.Banners
 import com.luckycart.model.Event
+import com.luckycart.model.GameExperience
 import com.luckycart.model.GameFilter
 import com.luckycart.model.GameResponse
 import com.luckycart.model.TransactionResponse
@@ -47,16 +48,17 @@ interface ApiService {
     @POST("/v1/event")
     fun sendShopperEvent(@Body event: Event): Observable<Void>
 
-    @FormUrlEncoded
     @POST("game-experiences-access")
     fun getGamesAccess(@Field("siteKey") siteKey: String,
                        @Field("shopperId") shopperId: String,
                        @Field("count") count: Int,
-                       @Body filters: GameFilter): Observable<GameResponse>
+                       @Body filters: GameFilter): Observable<List<GameExperience>>
 
-    @GET("{auth_key}/{customerId}/banners/{format}/{page_type}/banner/")
+    @GET("{auth_key}/{customerId}/{Type}/{platform}/{page_type}/{format}/")
     fun getBannerExperience(@Path("auth_key") auth_key: String,
                             @Path("customerId") customerId: String,
+                            @Path("Type") Type: String?,
+                            @Path("platform") platform: String?,
                             @Path("page_type") page_type: String,
                             @Path("format") format: String,
                             @Query("pageId") pageId: String?,

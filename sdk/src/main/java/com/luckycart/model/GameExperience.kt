@@ -1,6 +1,6 @@
 package com.luckycart.model
 
-data class GameResponseItem(
+data class GameExperience(
     val experienceId: String,
     val experienceUrl: String,
     val expiresAt: String,

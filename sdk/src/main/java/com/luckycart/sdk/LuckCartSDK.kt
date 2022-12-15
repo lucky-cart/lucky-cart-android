@@ -20,10 +20,8 @@ import java.util.concurrent.TimeUnit
 
 class LuckCartSDK(context: Context) {
 
-    private companion object {
-        const val RETRY_AFTER = 500L
-        const val MAX_ATTEMPTS = 5
-    }
+    private var retryAfter = 500L
+    private var maxAttempts = 5
 
     var luckyCartListener: LuckyCartListenerCallback? = null
     var mContext = context
@@ -40,6 +38,11 @@ class LuckCartSDK(context: Context) {
         if (customer != null) {
             Prefs(mContext).customer = customer
         } else Prefs(mContext).customer = "unknown"
+    }
+
+    fun setPollingConfig(retryAfter: Long, maxAttempts: Int) {
+        this.retryAfter = retryAfter
+        this.maxAttempts = maxAttempts
     }
 
     fun setActionListener(callBack: LuckyCartListenerCallback?) {
@@ -72,15 +75,15 @@ class LuckCartSDK(context: Context) {
         }
     }
 
-    fun getBannerDetails(pageType: String,format:String, pageID: String) {
+    fun getBannerDetails(pageType: String, format: String, pageID: String) {
         val formatPage: String = if (pageID.isEmpty())
             format
-        else format+"_"+pageID
+        else format + "_" + pageID
         val customer = Prefs(mContext).customer
         val key = Prefs(mContext).key
         key?.let { auth_key ->
             customer?.let { customer ->
-                dataManager.getBannerDetails(auth_key, customer, pageType,formatPage)
+                dataManager.getBannerDetails(auth_key, customer, pageType, formatPage)
                     .subscribeIO()
                     .observeOnMain()
                     .subscribeWith(object : DisposableObserver<BannerDetails>() {
@@ -131,6 +134,7 @@ class LuckCartSDK(context: Context) {
         }
     }
 
+    @Deprecated("Use getGamesAccess instead")
     fun getGame(cartID: String) {
         val customerId = Prefs(mContext).customer
         Prefs(mContext).key?.let { key ->
@@ -156,55 +160,69 @@ class LuckCartSDK(context: Context) {
     }
 
     @SuppressLint("CheckResult")
-    fun sendShopperEvent(event: Event) {
+    fun sendShopperEvent(siteKey: String, eventName: String, payload: EventPayload?) {
         val customerId = Prefs(mContext).customer
-        dataManager.sendShopperEvent(event)
-            .subscribeIO()
-            .observeOnMain()
-            .subscribeWith(object : DisposableObserver<Void>() {
 
-                override fun onNext(void: Void) {
-                    luckyCartListener?.onPostEvent("Success")
-                }
+        if (customerId != null) {
+            val event = (Event(
+                shopperId = customerId,
+                siteKey = siteKey,
+                eventName = eventName,
+                payload = payload
+            ))
+            dataManager.sendShopperEvent(event)
+                .subscribeIO()
+                .observeOnMain()
+                .subscribeWith(object : DisposableObserver<Void>() {
 
-                override fun onError(e: Throwable) {
-                    luckyCartListener?.onError(e.message)
-                }
+                    override fun onNext(void: Void) {
+                        luckyCartListener?.onPostEvent("Success")
+                    }
 
-                override fun onComplete() {
-                }
+                    override fun onError(e: Throwable) {
+                        luckyCartListener?.onError(e.message)
+                    }
 
-            })
+                    override fun onComplete() {
+                    }
+
+                })
+        }
     }
 
     @SuppressLint("CheckResult")
-    fun getBannerExperience(page_type: String,
-                            format: String,
-                            pageId: String?,
-                            store: String?,
-                            store_type: String?){
+    fun getBannerExperience(
+        page_type: String,
+        format: String,
+        type: String? = "banners",
+        platform: String? = "mobile",
+        pageId: String? = null,
+        store: String? = null,
+        store_type: String? = null
+    ) {
 
         val customer = Prefs(mContext).customer
         val auth_key = Prefs(mContext).key
-        if(customer != null && auth_key != null){
-            var attempt =0
-            dataManager.getBannerExperience(auth_key, customer,
-                    page_type,
-                format,pageId, store, store_type)
+        if (customer != null && auth_key != null) {
+            var attempt = 0
+            dataManager.getBannerExperience(
+                auth_key, customer, type, platform, page_type,
+                format, pageId, store, store_type
+            )
                 .subscribeIO()
                 .observeOnMain()
                 .doOnNext {
-                   if(it.bannerList?.isEmpty() == true && attempt < MAX_ATTEMPTS){
-                       attempt++
-                       throw Exception("Empty Data")
-                   }
+                    if (it.bannerList?.isEmpty() == true && attempt < maxAttempts) {
+                        attempt++
+                        throw Exception("Empty Data")
+                    }
                 }
                 .retryPolling(
                     predicate = { response ->
                         response is Exception
                     },
-                    delayBeforeRetry = RETRY_AFTER,
-                    maxRetry = MAX_ATTEMPTS,
+                    delayBeforeRetry = retryAfter,
+                    maxRetry = maxAttempts,
                     timeUnit = TimeUnit.MILLISECONDS
                 )
                 .subscribeWith(object : DisposableObserver<BannerResponse>() {
@@ -225,18 +243,20 @@ class LuckCartSDK(context: Context) {
     }
 
     @SuppressLint("CheckResult")
-    fun getGamesAccess(siteKey: String,
-                       count: Int?,
-                       filters: GameFilter){
+    fun getGamesAccess(
+        siteKey: String,
+        count: Int?,
+        filters: GameFilter
+    ) {
         val shopperId = Prefs(mContext).customer
         val countNotNull = count ?: 1
-        if(shopperId != null ){
-            var attempt =0
+        if (shopperId != null) {
+            var attempt = 0
             dataManager.getGamesAccess(siteKey, shopperId, countNotNull, filters)
                 .subscribeIO()
                 .observeOnMain()
                 .doOnNext {
-                    if(it.games?.isEmpty() == true && attempt < MAX_ATTEMPTS){
+                    if (it.isEmpty() && attempt < maxAttempts) {
                         attempt++
                         throw Exception("Empty Data")
                     }
@@ -245,14 +265,14 @@ class LuckCartSDK(context: Context) {
                     predicate = { response ->
                         response is Exception
                     },
-                    delayBeforeRetry = RETRY_AFTER,
-                    maxRetry = MAX_ATTEMPTS,
+                    delayBeforeRetry = retryAfter,
+                    maxRetry = maxAttempts,
                     timeUnit = TimeUnit.MILLISECONDS
                 )
-                .subscribeWith(object : DisposableObserver<GameResponse>() {
+                .subscribeWith(object : DisposableObserver<List<GameExperience>>() {
 
-                    override fun onNext(gameResponse: GameResponse) {
-                        luckyCartListener?.onRecieveListGames(gameResponse)
+                    override fun onNext(gameList: List<GameExperience>) {
+                        luckyCartListener?.onRecieveListGames(gameList)
                     }
 
                     override fun onError(e: Throwable) {

@@ -39,12 +39,25 @@ class BannerView : ConstraintLayout {
     }
 
     fun setBannerParams(banner: Banner?, listner: OnClickListener?) {
-        Log.e("test", "bannerDetails?.image_url =" + banner?.imageUrl)
         Glide.with(context).load(banner?.imageUrl).into(imgBanner)
         if (banner?.shopInShopRedirect != null) {
             imgBanner.setOnClickListener {
                 val intent = Intent(context, WebViewActivity::class.java)
                 intent.putExtra(INTENT_WEBVIEW_URL, banner.shopInShopRedirect)
+                context.startActivity(intent)
+            }
+        } else {
+            imgBanner.setOnClickListener(listner)
+        }
+    }
+
+    fun setBannerParams(banner: BannerDetails?, listner: OnClickListener?) {
+        Log.e("test", "bannerDetails?.image_url =" + banner?.image_url)
+        Glide.with(context).load(banner?.image_url).into(imgBanner)
+        if (banner?.redirect_url != null) {
+            imgBanner.setOnClickListener {
+                val intent = Intent(context, WebViewActivity::class.java)
+                intent.putExtra(INTENT_WEBVIEW_URL, banner.redirect_url)
                 context.startActivity(intent)
             }
         } else {

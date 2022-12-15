@@ -2,9 +2,14 @@ package com.luckycart.model
 
 data class Product(
     val productId: String,
-    val unitAtiAmount: Double,
-    val unitTfAmount: Double,
+    val unitAtiAmount: Float,
+    val finalAtiAmount: Float,
     val quantity: String,
-    val category: String?,
-    val brand: String,
+    val finalTfAmount: Float? = null,
+    val unitTfAmount: Float? = null,
+    val discountAtiAmount: Float? = null,
+    val discountTfAmount: Float? = null,
+    val category: String? = null,
+    val brand: String? = null,
+    val ean: String? = null,
 )

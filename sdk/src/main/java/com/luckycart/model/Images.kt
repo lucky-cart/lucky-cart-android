@@ -4,5 +4,5 @@ data class Images(
     val desktopUrl: String,
     val mobileUrl: String,
     val tabletUrl: String,
-    val thumbnailUrl: Any
+    val thumbnailUrl: String?
 )

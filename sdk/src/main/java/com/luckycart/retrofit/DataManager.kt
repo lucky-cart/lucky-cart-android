@@ -5,6 +5,7 @@ import com.luckycart.model.BannerDetails
 import com.luckycart.model.BannerResponse
 import com.luckycart.model.Banners
 import com.luckycart.model.Event
+import com.luckycart.model.GameExperience
 import com.luckycart.model.GameFilter
 import com.luckycart.model.GameResponse
 import com.luckycart.model.TransactionResponse
@@ -23,9 +24,9 @@ class DataManager {
     }
 
     fun getBannerDetails(
-        key: String, customerId: String, pageType: String,pageId: String
+        key: String, customerId: String, pageType: String, pageId: String
     ): Observable<BannerDetails> {
-        return bannerApi.getBannerDetails(key, customerId, pageType,pageId)
+        return bannerApi.getBannerDetails(key, customerId, pageType, pageId)
     }
 
     fun sendCart(cart: JsonObject?): Observable<TransactionResponse> {
@@ -40,20 +41,36 @@ class DataManager {
         return shopperApi.sendShopperEvent(event)
     }
 
-    fun getGamesAccess(siteKey: String,
-                       shopperId: String,
-                       count: Int,
-                       filters: GameFilter): Observable<GameResponse> {
+    fun getGamesAccess(
+        siteKey: String,
+        shopperId: String,
+        count: Int,
+        filters: GameFilter
+    ): Observable<List<GameExperience>> {
         return gamesApi.getGamesAccess(siteKey, shopperId, count, filters)
     }
 
-    fun getBannerExperience(auth_key: String,
-                            customerId: String,
-                            page_type: String,
-                            format: String,
-                            pageId: String?,
-                            store: String?,
-                            store_type: String?): Observable<BannerResponse> {
-        return displayerApi.getBannerExperience(auth_key, customerId,page_type, format, pageId, store, store_type)
+    fun getBannerExperience(
+        auth_key: String,
+        customerId: String,
+        type: String?,
+        platform: String?,
+        page_type: String,
+        format: String,
+        pageId: String?,
+        store: String?,
+        store_type: String?
+    ): Observable<BannerResponse> {
+        return displayerApi.getBannerExperience(
+            auth_key,
+            customerId,
+            type,
+            platform,
+            page_type,
+            format,
+            pageId,
+            store,
+            store_type
+        )
     }
 }
