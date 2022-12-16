@@ -38,16 +38,20 @@ class BannerView : ConstraintLayout {
         inflater.inflate(R.layout.item_banner, this)
     }
 
-    fun setBannerParams(banner: Banner?, listner: OnClickListener?) {
+    fun setBannerParams(banner: Banner, clickListener: OnClickListener?, listener: (Banner) -> Unit) {
         Glide.with(context).load(banner?.imageUrl).into(imgBanner)
         if (banner?.shopInShopRedirect != null) {
             imgBanner.setOnClickListener {
+                listener.invoke(banner)
                 val intent = Intent(context, WebViewActivity::class.java)
                 intent.putExtra(INTENT_WEBVIEW_URL, banner.shopInShopRedirect)
                 context.startActivity(intent)
             }
         } else {
-            imgBanner.setOnClickListener(listner)
+            imgBanner.setOnClickListener {
+                clickListener
+                listener.invoke(banner)
+            }
         }
     }
 

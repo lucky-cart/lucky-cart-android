@@ -5,11 +5,13 @@ import com.luckycart.model.BannerDetails
 import com.luckycart.model.BannerResponse
 import com.luckycart.model.Banners
 import com.luckycart.model.Event
+import com.luckycart.model.Filter
 import com.luckycart.model.GameExperience
 import com.luckycart.model.GameFilter
 import com.luckycart.model.GameResponse
 import com.luckycart.model.TransactionResponse
 import io.reactivex.Observable
+import retrofit2.Response
 
 class DataManager {
 
@@ -37,7 +39,7 @@ class DataManager {
         return transactionApiManager.getGames(key, cartID, customerId)
     }
 
-    fun sendShopperEvent(event: Event): Observable<Void> {
+    fun sendShopperEvent(event: Event): Observable<Response<Void>> {
         return shopperApi.sendShopperEvent(event)
     }
 
