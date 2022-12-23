@@ -1,50 +1,18 @@
 package com.luckycart.retrofit
 
-import com.google.gson.JsonObject
-import com.luckycart.model.BannerDetails
 import com.luckycart.model.BannerResponse
-import com.luckycart.model.Banners
 import com.luckycart.model.Event
-import com.luckycart.model.Filter
 import com.luckycart.model.GameExperience
 import com.luckycart.model.GameFilter
-import com.luckycart.model.GameResponse
-import com.luckycart.model.TransactionResponse
 import io.reactivex.Observable
-import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
-
-    @GET("{auth_key}/{customerId}/banners/mobile/list")
-    fun listAvailableBanners(
-        @Path("auth_key") auth_key: String, @Path("customerId") customerId: String
-    ): Observable<Banners>
-
-    @GET("{auth_key}/{customerId}/banner/mobile/{page_type}/{page_id}")
-    fun getBannerDetails(
-        @Path("auth_key") auth_key: String,
-        @Path("customerId") customerId: String,
-        @Path("page_type") page_type: String,
-        @Path("page_id") page_id: String
-    ): Observable<BannerDetails>
-
-    @POST("cart/ticket.json")
-    fun sendCart(@Body cart: JsonObject?): Observable<TransactionResponse>
-
-    @GET("cart/games")
-    fun getGames(
-        @Query("authKey") authKey: String,
-        @Query("cartId") cartId: String,
-        @Query("customerId") customerId: String
-    ): Observable<GameResponse>
 
     @POST("/v1/event")
     fun sendShopperEvent(@Body event: Event): Observable<Response<Void>>

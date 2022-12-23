@@ -1,7 +1,7 @@
 package com.luckycart.model
 
 data class EventPayload(
-    val cartId: Int? = null,
+    val cartId: Long? = null,
     val shopperEmail: String? = null,
     val transactionDate: String? = null,
     val storeId: String? = null,

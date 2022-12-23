@@ -1,7 +1,5 @@
 package com.luckycart.retrofit
 
-import com.luckycart.utils.BASE_URL_BANNER
-import com.luckycart.utils.BASE_URL_CART
 import com.luckycart.utils.BASE_URL_DISPLAYER
 import com.luckycart.utils.BASE_URL_GAME
 import com.luckycart.utils.BASE_URL_SHOPPER
@@ -36,15 +34,6 @@ class ApiManager {
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .client(client)
             .build()
-
-
-    val bannerApi: ApiService by lazy {
-        retrofitInstance(BASE_URL_BANNER).create(ApiService::class.java)
-    }
-
-    val cartApi: ApiService by lazy {
-        retrofitInstance(BASE_URL_CART).create(ApiService::class.java)
-    }
 
     val shopperApi: ApiService by lazy {
         retrofitInstance(BASE_URL_SHOPPER).create(ApiService::class.java)

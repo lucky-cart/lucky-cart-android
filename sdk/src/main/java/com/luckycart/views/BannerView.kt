@@ -3,13 +3,11 @@ package com.luckycart.views
 import android.content.Context
 import android.content.Intent
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.Glide
 import com.luckycart.model.Banner
-import com.luckycart.model.BannerDetails
 import com.luckycart.model.Game
 import com.luckycart.sdk.R
 import com.luckycart.utils.INTENT_WEBVIEW_URL
@@ -52,20 +50,6 @@ class BannerView : ConstraintLayout {
                 clickListener
                 listener.invoke(banner)
             }
-        }
-    }
-
-    fun setBannerParams(banner: BannerDetails?, listner: OnClickListener?) {
-        Log.e("test", "bannerDetails?.image_url =" + banner?.image_url)
-        Glide.with(context).load(banner?.image_url).into(imgBanner)
-        if (banner?.redirect_url != null) {
-            imgBanner.setOnClickListener {
-                val intent = Intent(context, WebViewActivity::class.java)
-                intent.putExtra(INTENT_WEBVIEW_URL, banner.redirect_url)
-                context.startActivity(intent)
-            }
-        } else {
-            imgBanner.setOnClickListener(listner)
         }
     }
 

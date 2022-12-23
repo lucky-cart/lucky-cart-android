@@ -2,21 +2,15 @@ package com.luckycart.sdk
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.widget.Toast
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import com.luckycart.local.Prefs
 import com.luckycart.model.*
 import com.luckycart.retrofit.DataManager
-import com.luckycart.utils.AUTH_V
-import com.luckycart.utils.HmacSignature
 import com.luckycart.utils.observeOnMain
 import com.luckycart.utils.retryPolling
 import com.luckycart.utils.subscribeIO
 import io.reactivex.observers.DisposableObserver
 import org.json.JSONObject
 import retrofit2.Response
-import java.util.Date
 import java.util.concurrent.TimeUnit
 
 
@@ -51,32 +45,6 @@ class LuckCartSDK(context: Context) {
         luckyCartListener = callBack
     }
 
-    @Deprecated("Use getBannersExperience instead of listAvailableBanners")
-    fun listAvailableBanners() {
-        val customer = Prefs(mContext).customer
-        val key = Prefs(mContext).key
-        key?.let { auth_key ->
-            customer?.let { customer ->
-                dataManager.listAvailableBanners(auth_key, customer)
-                    .subscribeIO()
-                    .observeOnMain()
-                    .subscribeWith(object : DisposableObserver<Banners>() {
-                        override fun onNext(banners: Banners) {
-                            Prefs(mContext).banners = banners
-                            luckyCartListener?.onRecieveListAvailableBanners(banners)
-                        }
-
-                        override fun onError(e: Throwable) {
-                            luckyCartListener?.onError(e.message)
-                        }
-
-                        override fun onComplete() {}
-
-                    })
-            }
-        }
-    }
-
     @SuppressLint("CheckResult")
     fun getBannersExperience(
         page_type: String,
@@ -92,8 +60,15 @@ class LuckCartSDK(context: Context) {
         if (customer != null && auth_key != null) {
             var attempt = 0
             dataManager.getBannerExperience(
-                auth_key, customer, "banners", platform, page_type,
-                format, pageId, store, store_type
+                auth_key = auth_key,
+                customerId = customer,
+                type = "banners",
+                platform = platform,
+                page_type = page_type,
+                format = format,
+                pageId = pageId,
+                store = store,
+                store_type = store_type
             )
                 .subscribeIO()
                 .observeOnMain()
@@ -124,39 +99,9 @@ class LuckCartSDK(context: Context) {
 
                     }
                 })
-
         }
     }
 
-    @Deprecated("Use getBannerExperienceDetail instead of getBannerDetails")
-    fun getBannerDetails(pageType: String, format: String, pageID: String) {
-        val formatPage: String = if (pageID.isEmpty())
-            format
-        else format + "_" + pageID
-        val customer = Prefs(mContext).customer
-        val key = Prefs(mContext).key
-        key?.let { auth_key ->
-            customer?.let { customer ->
-                dataManager.getBannerDetails(auth_key, customer, pageType, formatPage)
-                    .subscribeIO()
-                    .observeOnMain()
-                    .subscribeWith(object : DisposableObserver<BannerDetails>() {
-                        override fun onNext(bannerDetails: BannerDetails) {
-                            luckyCartListener?.onRecieveBannerDetails(bannerDetails)
-                        }
-
-                        override fun onError(e: Throwable) {
-                            luckyCartListener?.onError(e.message)
-                        }
-
-                        override fun onComplete() {}
-
-                    })
-            }
-        }
-    }
-
-    @SuppressLint("CheckResult")
     fun getBannerExperienceDetail(
         page_type: String,
         format: String,
@@ -168,76 +113,50 @@ class LuckCartSDK(context: Context) {
 
         val customer = Prefs(mContext).customer
         val auth_key = Prefs(mContext).key
-        if (customer != null && auth_key != null) {
-            var attempt = 0
-            dataManager.getBannerExperience(
-                auth_key, customer, "banner", platform, page_type,
-                format, pageId, store, store_type
-            )
-                .subscribeIO()
-                .observeOnMain()
-                .doOnNext {
-                    if (it.banner == null && attempt < maxAttempts) {
-                        attempt++
-                        throw Exception("Empty Data")
-                    }
-                }
-                .retryPolling(
-                    predicate = { response ->
-                        response is Exception
-                    },
-                    delayBeforeRetry = retryAfter,
-                    maxRetry = maxAttempts,
-                    timeUnit = TimeUnit.MILLISECONDS
+        customer?.let {
+            auth_key?.let {
+                var attempt = 0
+                dataManager.getBannerExperience(
+                    auth_key, customer, "banner", platform, page_type,
+                    format, pageId, store, store_type
                 )
-                .subscribeWith(object : DisposableObserver<BannerResponse>() {
-                    override fun onNext(bannerResponse: BannerResponse) {
-                        bannerResponse.banner?.let { luckyCartListener?.onBannerDetailReceived(it) }
+                    .subscribeIO()
+                    .observeOnMain()
+                    .doOnNext {
+                        if (it.banner == null && attempt < maxAttempts) {
+                            attempt++
+                            throw Exception("Empty Data")
+                        }
                     }
+                    .retryPolling(
+                        predicate = { response ->
+                            response is Exception
+                        },
+                        delayBeforeRetry = retryAfter,
+                        maxRetry = maxAttempts,
+                        timeUnit = TimeUnit.MILLISECONDS
+                    )
+                    .subscribeWith(object : DisposableObserver<BannerResponse>() {
+                        override fun onNext(bannerResponse: BannerResponse) {
+                            bannerResponse.banner?.let {
+                                luckyCartListener?.onBannerDetailReceived(
+                                    it
+                                )
+                            }
+                        }
 
-                    override fun onError(e: Throwable) {
-                        luckyCartListener?.onError(e.message)
-                    }
+                        override fun onError(e: Throwable) {
+                            luckyCartListener?.onError(e.message)
+                        }
 
-                    override fun onComplete() {
+                        override fun onComplete() {
 
-                    }
-                })
-
+                        }
+                    })
+            }
         }
     }
 
-    @Deprecated("Use sendShopperEvent instead with Event Object")
-    fun sendCart(cart: JsonObject) {
-        val customerId = Prefs(mContext).customer
-        val timesTamp = (Date().time / 1000).toString()
-        val sign = HmacSignature().generateSignature(timesTamp)
-        val cartTransaction = JsonObject()
-        Prefs(mContext).key?.let { key ->
-            cartTransaction.addProperty("auth_key", key)
-            cartTransaction.addProperty("auth_ts", timesTamp)
-            cartTransaction.addProperty("auth_sign", sign)
-            cartTransaction.addProperty("auth_v", AUTH_V)
-            cartTransaction.addProperty("customerId", customerId)
-            dataManager.sendCart(deepMerge(cart, cartTransaction))
-                .subscribeIO()
-                .observeOnMain()
-                .subscribeWith(object : DisposableObserver<TransactionResponse>() {
-                    override fun onNext(response: TransactionResponse) {
-                        luckyCartListener?.onRecieveSendCartTransactionResponse(response)
-                    }
-
-                    override fun onError(e: Throwable) {
-                        Toast.makeText(mContext, "Error: " + e.message, Toast.LENGTH_SHORT).show()
-                    }
-
-                    override fun onComplete() {
-                    }
-                })
-        }
-    }
-
-    @SuppressLint("CheckResult")
     fun sendShopperEvent(siteKey: String, eventName: String, payload: EventPayload?) {
         val customerId = Prefs(mContext).customer
 
@@ -248,37 +167,14 @@ class LuckCartSDK(context: Context) {
                 eventName = eventName,
                 payload = payload
             ))
-            dataManager.sendShopperEvent(event)
-                .subscribeIO()
-                .observeOnMain()
-                .subscribeWith(object : DisposableObserver<Response<Void>>() {
-
-                    override fun onNext(void: Response<Void>) {
-                        luckyCartListener?.onPostEvent("Success")
-                    }
-
-                    override fun onError(e: Throwable) {
-                        luckyCartListener?.onError(e.message)
-                    }
-
-                    override fun onComplete() {
-                    }
-
-                })
-        }
-    }
-
-    @Deprecated("Use getGamesAccess instead of getGame")
-    fun getGame(cartID: String) {
-        val customerId = Prefs(mContext).customer
-        Prefs(mContext).key?.let { key ->
-            customerId?.let {
-                dataManager.getGames(key, cartID, it)
+            dataManager.run {
+                sendShopperEvent(event)
                     .subscribeIO()
                     .observeOnMain()
-                    .subscribeWith(object : DisposableObserver<GameResponse>() {
-                        override fun onNext(listGame: GameResponse) {
-                            luckyCartListener?.onRecieveListGames(listGame)
+                    .subscribeWith(object : DisposableObserver<Response<Void>>() {
+
+                        override fun onNext(void: Response<Void>) {
+                            luckyCartListener?.onPostEvent("Success")
                         }
 
                         override fun onError(e: Throwable) {
@@ -287,13 +183,11 @@ class LuckCartSDK(context: Context) {
 
                         override fun onComplete() {
                         }
-
                     })
             }
         }
     }
 
-    @SuppressLint("CheckResult")
     fun getGamesAccess(
         siteKey: String,
         count: Int?,
@@ -301,9 +195,10 @@ class LuckCartSDK(context: Context) {
     ) {
         val shopperId = Prefs(mContext).customer
         val countNotNull = count ?: 1
-        if (shopperId != null) {
+        shopperId?.let {
+            it
             var attempt = 0
-            dataManager.getGamesAccess(siteKey, shopperId, countNotNull, filters)
+            dataManager.getGamesAccess(siteKey, it, countNotNull, filters)
                 .subscribeIO()
                 .observeOnMain()
                 .doOnNext {
@@ -332,29 +227,7 @@ class LuckCartSDK(context: Context) {
 
                     override fun onComplete() {
                     }
-
                 })
         }
-
-    }
-
-    private fun deepMerge(source: JsonObject, target: JsonObject): JsonObject {
-        for ((key, value) in source.entrySet()) {
-            if (!target.has(key)) {
-                if (!value.isJsonNull)
-                    target.add(key, value)
-            } else {
-                if (!value.isJsonNull) {
-                    if (value.isJsonObject) {
-                        deepMerge(value.asJsonObject, target[key].asJsonObject)
-                    } else {
-                        target.add(key, value)
-                    }
-                } else {
-                    target.remove(key)
-                }
-            }
-        }
-        return target
     }
 }

@@ -1,11 +1,11 @@
 package com.luckycart.model
 
 data class Banner(
-    val experienceId: String,
-    val helpRedirect: String,
-    val imageUrl: String,
-    val operationId: String,
-    val shopInShopRedirect: String,
-    val spaceId: String,
-    val spaceRedirect: Any
+    val experienceId: String? = null,
+    val helpRedirect: String? = null,
+    val imageUrl: String? = null,
+    val operationId: String? = null,
+    val shopInShopRedirect: String? = null,
+    val spaceId: String? = null,
+    val spaceRedirect: String? = null
 )
