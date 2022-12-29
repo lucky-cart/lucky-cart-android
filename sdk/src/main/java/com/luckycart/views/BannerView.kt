@@ -3,12 +3,11 @@ package com.luckycart.views
 import android.content.Context
 import android.content.Intent
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.Glide
-import com.luckycart.model.BannerDetails
+import com.luckycart.model.Banner
 import com.luckycart.model.Game
 import com.luckycart.sdk.R
 import com.luckycart.utils.INTENT_WEBVIEW_URL
@@ -37,17 +36,20 @@ class BannerView : ConstraintLayout {
         inflater.inflate(R.layout.item_banner, this)
     }
 
-    fun setBannerParams(bannerDetails: BannerDetails?, listner: OnClickListener?) {
-        Log.e("test", "bannerDetails?.image_url =" + bannerDetails?.image_url)
-        Glide.with(context).load(bannerDetails?.image_url).into(imgBanner)
-        if (bannerDetails?.action?.type.isNullOrEmpty()) {
+    fun setBannerParams(banner: Banner, clickListener: OnClickListener?, listener: (Banner) -> Unit) {
+        Glide.with(context).load(banner?.imageUrl).into(imgBanner)
+        if (banner?.shopInShopRedirect != null) {
             imgBanner.setOnClickListener {
+                listener.invoke(banner)
                 val intent = Intent(context, WebViewActivity::class.java)
-                intent.putExtra(INTENT_WEBVIEW_URL, bannerDetails?.redirect_url)
+                intent.putExtra(INTENT_WEBVIEW_URL, banner.shopInShopRedirect)
                 context.startActivity(intent)
             }
         } else {
-            imgBanner.setOnClickListener(listner)
+            imgBanner.setOnClickListener {
+                clickListener
+                listener.invoke(banner)
+            }
         }
     }
 

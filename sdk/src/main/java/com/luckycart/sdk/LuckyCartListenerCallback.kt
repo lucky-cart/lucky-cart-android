@@ -1,16 +1,12 @@
 package com.luckycart.sdk
 
-import com.luckycart.model.BannerDetails
-import com.luckycart.model.Banners
-import com.luckycart.model.GameResponse
-import com.luckycart.model.TransactionResponse
+import com.luckycart.model.Banner
+import com.luckycart.model.GameExperience
 
 interface LuckyCartListenerCallback {
-
-    fun onRecieveListAvailableBanners(banners: Banners)
-    fun onRecieveBannerDetails(bannerDetails: BannerDetails)
-    fun onRecieveSendCartTransactionResponse(transactionResponse: TransactionResponse)
-    fun onRecieveListGames(gameResponse: GameResponse)
+    fun onBannerListReceived(bannerList: List<Banner>)
+    fun onBannerDetailReceived(banner: Banner)
+    fun onPostEvent(success: String?)
+    fun onGameListReceived(gameList: List<GameExperience>)
     fun onError(error: String?)
-
 }
