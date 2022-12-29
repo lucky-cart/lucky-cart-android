@@ -21,7 +21,7 @@ Add the dependency in your application build.gradle file
 ```
 dependencies {
     //luckCart
-    implementation 'com.github.lucky-cart:lucky-cart-android:1.0.14'
+    implementation 'com.github.lucky-cart:lucky-cart-android:1.0.16'
 }
 ```
 
@@ -53,9 +53,11 @@ class ApplicationSampleLuckyCart: Application() {
         luckyCartSDK = LuckCartSDK(applicationContext)
         luckyCartSDK?.init(auth, null)
         luckyCartSDK?.setUser(CUSTOMER_ID)
+        // set PollingConfig (retryAfter and maxAttempts by API)
+        luckyCartSDK?.setPollingConfig(500L, 5)
+
         // get list of available banners when application start
-        luckyCartSDK?.listAvailableBanners() 
-        // list of available banners will be saved in a shared preference in the SDK and will accessible from any class in the project
+        luckyCartSDK?.getBannersExperience(page_type = "Homepage", format = "banner")
     }
 
 }
@@ -70,26 +72,26 @@ You can then add a banner in your layout:
     android:layout_height="wrap_content" />
 ```
 
-then send the bannner details:
+then send the bannner details with the Click to get BannerClicked Event:
 
 ```
-bannerView.setBannerParams(bannerDetails, clickListner)
+    bannerView.setBannerParams(item, clickListener, listener)
 ```
       
 LuckyCartListenerCallback is an interface which contains response receive from LuckCart server, this is managed in the SDK
 no need to create LuckyCartListenerCallback.
 
 ```
-interface LuckyCartListenerCallback {
-   fun onRecieveListAvailableBanners(banners: Banners)
-   fun onRecieveBannerDetails(bannerDetails: BannerDetails)
-   fun onRecieveSendCartTransactionResponse(transactionResponse: TransactionResponse)
-   fun onRecieveListGames(gameResponse: GameResponse)
-   fun onError(error: String?)
-}
+    interface LuckyCartListenerCallback {
+        fun onBannerListReceived(bannerList: List<Banner>)
+        fun onBannerDetailReceived(banner: Banner)
+        fun onPostEvent(success: String?)
+        fun onGameListReceived(gameList: List<GameExperience>)
+        fun onError(error: String?)
+    }
 ```
 
-You will need to implement LuckyCartListenerCallback to recieve and override what happen when you get all those events above
+You will need to implement LuckyCartListenerCallback to receive and override what happen when you get all those events above
 
 ```
 class MainViewModel : ViewModel(), LuckyCartListenerCallback {
@@ -104,133 +106,201 @@ class MainViewModel : ViewModel(), LuckyCartListenerCallback {
         luckyCartSDK?.setActionListener(this)
    }
    
-   private fun loadBannerHomePage() {
-        getBannerCategory = false
-        Prefs(mContext).banners?.homepage?.forEach { format ->
-            luckyCartSDK?.getBannerDetails(BANNER_HOMEPAGE, format, "")
-        }
-    }
-    
-    fun loadBannerCategory(pageId: String) {
-        getBannerCategory = true
-        Prefs(mContext).banners?.categories?.forEach {
-            if (it.contains(pageId) && !it.contains("search")) luckyCartSDK?.getBannerDetails(
-                BANNER_CATEGORIES,
-                it,
-                ""
-            )
-        }
-    }
+   // Get BannersExperience List
+   fun getBannersExperience(){
+       luckyCartSDK?.getBannersExperience(page_type = "Homepage", format = "banner")
+   }
    
-   override fun onRecieveListAvailableBanners(banners: Banners) {
-        loadBannerHomePage()
-    }
-
-    override fun onRecieveBannerDetails(bannerDetails: BannerDetails) {
-        if (bannerDetails.name != null) {
-            if (getBannerCategory) {
-                getBannerCategoryDetails.value = GetBannerState.OnSuccess(bannerDetails)
-            } else getBannerDetails.value = GetBannerState.OnSuccess(bannerDetails)
-        } else {
-            getBannerCategoryDetails.value = GetBannerState.OnError("error")
-        }
-    }
+   //Callback Of getBannersExperience Api
+   override fun onBannerListReceived(bannerList: List<Banner>) {
+       
+   }
+   
+   // Get BannerExperience Detail 
+   fun loadBannerCategory(pageId: String) {
+        getBannerCategory = true
+        luckyCartSDK?.getBannerExperienceDetail(page_type = BANNER_CATEGORIES, format = "banner", pageId = pageId)
+   }
     
-    override fun onRecieveSendCartTransactionResponse(transactionResponse: TransactionResponse) {
-        luckyCartSDK?.getGame(cartID)
-    }
+   //Callback Of getBannerExperienceDetail Api
+   override fun onBannerDetailReceived(banner: Banner) {
+       
+   }
+   
+   // Get GamesAccess List 
+   fun getGameList(){
+       if(cardID == "cartValidated"){
+                val filters = arrayListOf<Filter>()
+                filters.add(Filter(filterProperty = "cartId", filterValue = "filtervalue"))
+                luckyCartSDK?.getGamesAccess(siteKey = AUTH_KEY, count = 1, filters = GameFilter(requestFilter = filters))
+       }
+   }
+   
+   //Callback Of getGamesAccess Api
+   override fun onGameListReceived(gameList: List<GameExperience>) {
 
-    override fun onRecieveListGames(gameResponse: GameResponse) {
-        (mContext as MainActivity).showFragmentGame(gameResponse.games)
-    }
+   }
+   
+   //Callback of Api error
+   override fun onError(error: String?) {
+   
+   }
+   
+   //Post Event bannerViewed to User
+   fun bannerViewed(banner : Banner){
+        cardID = ""
+        val eventPayload =EventPayload(pageType = "homepage",pageId = null,bannerType = "banner", bannerPosition = "homepage card", operationId = banner.operationId)
+        luckyCartSDK?.sendShopperEvent(AUTH_KEY, "bannerViewed", eventPayload)
+   }
+   
+   //Post Event bannerDisplayed to User
+   fun bannerDisplayed(){
+        cardID = ""
+        val eventPayload =EventPayload(pageType = "homepage",pageId = null,bannerType = "banner", bannerPosition = "homepage card")
+        luckyCartSDK?.sendShopperEvent(AUTH_KEY, "pagerView", eventPayload)
+   }
+   
+   //Post Event bannerClicked by User
+   fun bannerClicked(banner : Banner){
+        cardID = ""
+        val eventPayload =EventPayload(pageType = "homepage",pageId = null,bannerType = "banner", bannerPosition = "homepage card", operationId = banner.operationId)
+        luckyCartSDK?.sendShopperEvent(AUTH_KEY, "bannerClicked", eventPayload)
+   }
 
-    override fun onError(error: String?) {
-        Toast.makeText(mContext, "Error: $error", Toast.LENGTH_SHORT).show()
-    }
-    
+   //Callback of sendShopperEvent Api
+   override fun onPostEvent(success: String?) {
+
+   }
+   
 }
 
 ```
 
-        
+
 2-Start LuckyCart
 
 Initialize the LuckyCart using object LCAuthorization and JsonObject which contains sdk configuration properties (URL Lucky Cart server, ...).
 
 ```
-val auth = LCAuthorization(AUTH_KEY, "")
-luckyCartSDK = LuckCartSDK(mContext)
-// Object LCAuthorization contains the value of key and secret
-luckyCartSDK?.init(auth, null)
+    val auth = LCAuthorization(AUTH_KEY, "")
+    luckyCartSDK = LuckCartSDK(mContext)
+        
+    // Object LCAuthorization contains the value of key and secret
+    luckyCartSDK?.init(auth, null)
+        
+    // set PollingConfig (retryAfter and maxAttempts by API)
+    luckyCartSDK?.setPollingConfig(500L, 5)
 ```
 3-Set the current user
 
 If customer id is not passed in init, you can set it by calling the setUserId() function. Customer id is required to send cart information at checkout time.
 
 ```
-luckyCartSDK?.setUser(CUSTOMER_ID)
+    luckyCartSDK?.setUser(CUSTOMER_ID)
 ```
      
 4-Load and display Banner 
 
-To Load banner you can call function listAvailableBanners():
+To Load bannersList, you can call getBannersExperience() function:
 
 ```
-luckyCartSDK?.listAvailableBanners()
+    luckyCartSDK?.getBannersExperience(page_type = "Homepage", format = "banner")
 ```
 
 To display list of banner, you should extend the interface LuckyCartListenerCallback and call this function setActionListener(callBack: LuckyCartListenerCallback?) in your class.
 
 ```
-override fun listAvailableBanners(banners: Banners) {
-     availableBanners = banners
-     loadBannerHomePage()
- }
+    override fun onBannerListReceived(bannerList: List<Banner>) {
+           
+    }
  ```
 
 5-Display Banner Details
 
-To get banner details,you can call the function getBannerDetails(pageType: kotlin.String, pageID: kotlin.String).
+To get banner details,you can call the function getBannerExperienceDetail(page_type = BANNER_CATEGORIES, format = "banner", pageId = pageId).
 
-pageType: Current page type (homepage, cart, categories, etc...).
-pageID: Current page ID
+page_type: Current page type (homepage, cart, categories, etc...).
+pageId: Current page ID
 
  ```
  luckyCartSDK?.setActionListener(this)
- luckyCartSDK?.getBannerDetails(BANNER_CATEGORIES, shopID)
+ luckyCartSDK?.getBannerExperienceDetail(page_type = BANNER_CATEGORIES, format = "banner", pageId = pageId)
+ 
  ```
 
 
-6-Send Cart to LuckyCart
+6-Sending Events to LuckyCart
 
-*Prepare data 
+* Prepare the data
 
-Each time your application does a check out, some data are sent to LuckyCart.The data should be of type JsonObject and contains cartId.
-In this exemple, we create a simple JsonObject with the sample data from the LuckyCart application sample. It will then be merged with LuckyCart required fields before being sent:
-
-```
-val card = JsonObject()
-card.addProperty("cartId", cardId)
-card.addProperty("ttc", productPrice)
-card.add("products", products)
-```
-
-*Send Data
-
-Once your application did a succesful checkout, call this function to send ticket information to LuckyCart and receive an aknowledgment.
+LuckyCart allows the user to send the details of the transaction that has just been performed by the consumer in custom Object named "Event".
+We will Provide all fields need it for the current transaction in EventPayload Object.
 
 ```
-luckyCartSDK?.setActionListener(this)
-luckyCartSDK?.sendCard(card)
+Event(
+    val shopperId: String,
+    val siteKey: String,
+    val eventName: String? = null,
+    val ipAddress: String? = null,
+    val payload: EventPayload? = null
+)
+EventPayload(
+    val cartId: Long? = null,
+    val page: String? = null,
+    val pageType: String? = null,
+    val pageId: String? = null,
+    val operationId: String? = null,
+    val products: List<Product>? = null
+    ...
+)
+```
+
+* Send Current Event 
+
+LuckyCart lets you to send various events to Lucky Cart services with sendShopperEvent function.
+you can send the event type with eventName field like(bannerViewed, pagerView, bannerClicked, cartValidated)
+
+```
+   luckyCartSDK?.sendShopperEvent(siteKey= AUTH_KEY, eventName = "bannerViewed", eventPayload = EventPayload())
+   
+   or 
+   
+   val products = arrayListOf<SDKProduct>()
+   products.add(SDKProduct())
+   products.add(SDKProduct())
+   val eventPayload =EventPayload(cartId = timesTamp,"currency", "options", products = products)
+
+   luckyCartSDK?.sendShopperEvent(siteKey=AUTH_KEY,eventName = "cartValidated",eventPayload = eventPayload)  
+   
+   // check if sendShopper send it successfully
+    override fun onPostEvent(success: String?) {
+        
+    }
+      
 ```
 
 7-Display Game
 
-To get list of game, you can call function getGame with input cart id.
+To display a list of games you need to call getGamesAccess function with the right gamesFilter object 
 
 ```
-luckyCartSDK?.getGame(cardID)
+
+    val filters = arrayListOf<Filter>()
+    filters.add(Filter(filterProperty = "cartId", filterValue = "filter Value"))
+    luckyCartSDK?.getGamesAccess(siteKey = AUTH_KEY, count = 1, filters = GameFilter(requestFilter = filters))
+
 ```
+
+The game list will be provided in onGameListReceived callback with all games available to display it
+
+```
+
+    override fun onGameListReceived(gameList: List<GameExperience>) {
+       
+    }
+
+```
+
 
 
       
