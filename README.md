@@ -21,7 +21,7 @@ Add the dependency in your application build.gradle file
 ```
 dependencies {
     //luckCart
-    implementation 'com.github.lucky-cart:lucky-cart-android:1.0.16'
+    implementation 'com.github.lucky-cart:lucky-cart-android:1.0.17'
 }
 ```
 
