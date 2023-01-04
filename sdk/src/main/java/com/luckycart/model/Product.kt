@@ -4,7 +4,7 @@ data class Product(
     val productId: String,
     val unitAtiAmount: Float,
     val finalAtiAmount: Float,
-    val quantity: String,
+    val quantity: Int,
     val finalTfAmount: Float? = null,
     val unitTfAmount: Float? = null,
     val discountAtiAmount: Float? = null,
