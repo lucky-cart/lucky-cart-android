@@ -21,7 +21,7 @@ Add the dependency in your application build.gradle file
 ```
 dependencies {
     //luckCart
-    implementation 'com.github.lucky-cart:lucky-cart-android:1.0.17'
+    implementation 'com.github.lucky-cart:lucky-cart-android:1.0.18'
 }
 ```
 
@@ -72,7 +72,7 @@ You can then add a banner in your layout:
     android:layout_height="wrap_content" />
 ```
 
-then send the bannner details with the Click to get BannerClicked Event:
+then send the banner details with the Click to get BannerClicked Event:
 
 ```
     bannerView.setBannerParams(item, clickListener, listener)
@@ -132,7 +132,7 @@ class MainViewModel : ViewModel(), LuckyCartListenerCallback {
        if(cardID == "cartValidated"){
                 val filters = arrayListOf<Filter>()
                 filters.add(Filter(filterProperty = "cartId", filterValue = "filtervalue"))
-                luckyCartSDK?.getGamesAccess(siteKey = AUTH_KEY, count = 1, filters = GameFilter(requestFilter = filters))
+                luckyCartSDK?.getGamesAccess(siteKey = AUTH_KEY, count = 1, filters = GameFilter(filters = filters))
        }
    }
    
@@ -284,17 +284,15 @@ you can send the event type with eventName field like(bannerViewed, pagerView, b
 To display a list of games you need to call getGamesAccess function with the right gamesFilter object 
 
 ```
-
     val filters = arrayListOf<Filter>()
     filters.add(Filter(filterProperty = "cartId", filterValue = "filter Value"))
-    luckyCartSDK?.getGamesAccess(siteKey = AUTH_KEY, count = 1, filters = GameFilter(requestFilter = filters))
+    luckyCartSDK?.getGamesAccess(siteKey = AUTH_KEY, count = 1, filters = GameFilter(filters = filters))
 
 ```
 
 The game list will be provided in onGameListReceived callback with all games available to display it
 
 ```
-
     override fun onGameListReceived(gameList: List<GameExperience>) {
        
     }
