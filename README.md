@@ -298,6 +298,9 @@ The game list will be provided in onGameListReceived callback with all games ava
     }
 
 ```
+Below you can see this video as a sample of the sdk usage.
+
+https://user-images.githubusercontent.com/2062107/211288636-825e6861-39fb-4271-81f4-17daff14a269.mp4
 
 
 
